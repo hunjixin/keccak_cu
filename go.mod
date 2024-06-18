@@ -8,6 +8,8 @@ require (
 	gorgonia.org/cu v0.9.5
 )
 
+replace gorgonia.org/cu => C:\Users\hunji\code\cu
+
 require (
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect

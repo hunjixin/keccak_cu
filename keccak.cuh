@@ -10,4 +10,3 @@
 
 #pragma once
 #include "config.h"
-void mcm_cuda_keccak_hash_batch(BYTE * in, WORD inlen, BYTE * out, WORD n_outbit, WORD n_batch);

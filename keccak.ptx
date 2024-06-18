@@ -10,15 +10,15 @@
 .target sm_52
 .address_size 64
 
-	// .globl	_Z18kernel_keccak_hashPhjS_jj
+	// .globl	kernel_keccak_hash
 .const .align 8 .b8 CUDA_KECCAK_CONSTS[192] = {1, 0, 0, 0, 0, 0, 0, 0, 130, 128, 0, 0, 0, 0, 0, 0, 138, 128, 0, 0, 0, 0, 0, 128, 0, 128, 0, 128, 0, 0, 0, 128, 139, 128, 0, 0, 0, 0, 0, 0, 1, 0, 0, 128, 0, 0, 0, 0, 129, 128, 0, 128, 0, 0, 0, 128, 9, 128, 0, 0, 0, 0, 0, 128, 138, 0, 0, 0, 0, 0, 0, 0, 136, 0, 0, 0, 0, 0, 0, 0, 9, 128, 0, 128, 0, 0, 0, 0, 10, 0, 0, 128, 0, 0, 0, 0, 139, 128, 0, 128, 0, 0, 0, 0, 139, 0, 0, 0, 0, 0, 0, 128, 137, 128, 0, 0, 0, 0, 0, 128, 3, 128, 0, 0, 0, 0, 0, 128, 2, 128, 0, 0, 0, 0, 0, 128, 128, 0, 0, 0, 0, 0, 0, 128, 10, 128, 0, 0, 0, 0, 0, 0, 10, 0, 0, 128, 0, 0, 0, 128, 129, 128, 0, 128, 0, 0, 0, 128, 128, 128, 0, 0, 0, 0, 0, 128, 1, 0, 0, 128, 0, 0, 0, 0, 8, 128, 0, 128, 0, 0, 0, 128};
 
-.visible .entry _Z18kernel_keccak_hashPhjS_jj(
-	.param .u64 _Z18kernel_keccak_hashPhjS_jj_param_0,
-	.param .u32 _Z18kernel_keccak_hashPhjS_jj_param_1,
-	.param .u64 _Z18kernel_keccak_hashPhjS_jj_param_2,
-	.param .u32 _Z18kernel_keccak_hashPhjS_jj_param_3,
-	.param .u32 _Z18kernel_keccak_hashPhjS_jj_param_4
+.visible .entry kernel_keccak_hash(
+	.param .u64 kernel_keccak_hash_param_0,
+	.param .u32 kernel_keccak_hash_param_1,
+	.param .u64 kernel_keccak_hash_param_2,
+	.param .u32 kernel_keccak_hash_param_3,
+	.param .u32 kernel_keccak_hash_param_4
 )
 {
 	.local .align 8 .b8 	__local_depot0[432];
@@ -31,11 +31,11 @@
 
 
 	mov.u64 	%SPL, __local_depot0;
-	ld.param.u64 	%rd482, [_Z18kernel_keccak_hashPhjS_jj_param_0];
-	ld.param.u32 	%r28, [_Z18kernel_keccak_hashPhjS_jj_param_1];
-	ld.param.u64 	%rd483, [_Z18kernel_keccak_hashPhjS_jj_param_2];
-	ld.param.u32 	%r30, [_Z18kernel_keccak_hashPhjS_jj_param_3];
-	ld.param.u32 	%r29, [_Z18kernel_keccak_hashPhjS_jj_param_4];
+	ld.param.u64 	%rd482, [kernel_keccak_hash_param_0];
+	ld.param.u32 	%r28, [kernel_keccak_hash_param_1];
+	ld.param.u64 	%rd483, [kernel_keccak_hash_param_2];
+	ld.param.u32 	%r30, [kernel_keccak_hash_param_3];
+	ld.param.u32 	%r29, [kernel_keccak_hash_param_4];
 	add.u64 	%rd1, %SPL, 0;
 	mov.u32 	%r31, %ntid.x;
 	mov.u32 	%r32, %ctaid.x;

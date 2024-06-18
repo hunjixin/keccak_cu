@@ -1,7 +1,11 @@
 package main
 
+//#cgo windows LDFLAGS:-LC:/cuda/v12.0/lib/x64 -LC:/cuda/v5.5/lib/x64 -LC:/cuda/v6.0/lib/x64 -LC:/cuda/v6.5/lib/x64 -LC:/cuda/v7.0/lib/x64 -LC:/cuda/v8.0/lib/x64 -LC:/cuda/v9.0/x64 -LC:/cuda/v11.8/lib/x64
+//#cgo windows CFLAGS: -IC:/cuda/v12.0/include -IC:/cuda/v5.5/include -IC:/cuda/v6.0/include -IC:/cuda/v6.5/include -IC:/cuda/v7.0/include -IC:/cuda/v8.0/include -IC:/cuda/v9.0/include -IC:/cuda/v11.8/include
+import "C"
+
 import (
-	"C"
+	"bytes"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
@@ -25,7 +29,7 @@ func run(ctx context.Context) error {
 		return err
 	}
 
-	_, err = findDevice()
+	_, _, err = testSetup()
 	if err != nil {
 		return err
 	}
@@ -36,21 +40,39 @@ func run(ctx context.Context) error {
 	}
 
 	fn, err := module.Function("kernel_keccak_hash")
+	if err != nil {
+		fmt.Println(":xxxxx")
+		return err
+	}
 
-	piece := [64]byte{}
-	rand.Read(piece[:])
+	batch := 1000
 
-	hash := crypto.Keccak256Hash(piece[:])
-	fmt.Println(hex.EncodeToString(hash[:]))
+	input := make([][64]byte, batch)
+	for i := 0; i < batch; i++ {
+		piece := [64]byte{}
+		rand.Read(piece[:])
+		input = append(input, piece)
+	}
 
-	result, err := cuda_batch_keccak(fn, [][64]byte{piece})
+	results, err := cuda_batch_keccak(fn, input)
 	if err != nil {
 		return err
 	}
-	fmt.Println(hex.EncodeToString(result[0][:]))
+	for index, result := range results {
+		hash := crypto.Keccak256Hash(input[index][:])
+		if !bytes.Equal(hash[:], result[:]) {
+			panic("xxxxxxxxxxxx")
+		}
+		fmt.Println("-----------")
+		fmt.Println("input: ", hex.EncodeToString(input[index][:]))
+		fmt.Println("cpu result: ", hex.EncodeToString(hash[:]))
+		fmt.Println("cuda result: ", hex.EncodeToString(result[:]))
+	}
+
+	return nil
 }
 
-func findDevice() (dev cu.Device, err error) {
+func testSetup() (dev cu.Device, ctx cu.CUContext, err error) {
 	devices, _ := cu.NumDevices()
 
 	if devices == 0 {
@@ -59,11 +81,14 @@ func findDevice() (dev cu.Device, err error) {
 	}
 
 	dev = cu.Device(0)
+	if ctx, err = dev.MakeContext(cu.SchedAuto); err != nil {
+		return
+	}
 	return
 }
 
-func cuda_batch_keccak(fn cu.Function, in [][64]byte) ([][32]byte, error) {
-	inNum := int64(len(in))
+func cuda_batch_keccak(fn cu.Function, hIn [][64]byte) ([][32]byte, error) {
+	inNum := int64(len(hIn))
 
 	dIn, err := cu.MemAlloc(64 * inNum)
 	if err != nil {
@@ -87,7 +112,7 @@ func cuda_batch_keccak(fn cu.Function, in [][64]byte) ([][32]byte, error) {
 		unsafe.Pointer(&block_size),
 	}
 
-	if err = cu.MemcpyHtoD(dIn, unsafe.Pointer(&in[0]), 64*inNum); err != nil {
+	if err = cu.MemcpyHtoD(dIn, unsafe.Pointer(&hIn[0]), 64*inNum); err != nil {
 		return nil, err
 	}
 
@@ -97,10 +122,12 @@ func cuda_batch_keccak(fn cu.Function, in [][64]byte) ([][32]byte, error) {
 		return nil, err
 	}
 
-	out := make([][32]byte, inNum)
-	if err = cu.MemcpyDtoH(unsafe.Pointer(&out[0]), dOut, 32*inNum); err != nil {
+	hOut := make([][32]byte, inNum)
+	if err = cu.MemcpyDtoH(unsafe.Pointer(&hOut[0]), dOut, 32*inNum); err != nil {
 		return nil, err
 	}
 
-	return out, nil
+	cu.MemFree(dIn)
+	cu.MemFree(dOut)
+	return hOut, nil
 }
