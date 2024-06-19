@@ -399,7 +399,7 @@ void kernel_keccak_hash(BYTE* indata, WORD inlen, BYTE* outdata, WORD n_batch, W
     cuda_keccak_final(&ctx, out);
 }
 
-void kernal_pack_argument_test(BYTE* chanllenge, uint32_t* nonce, BYTE* result)
+extern "C" __global__  void kernal_pack_argument_test(BYTE* chanllenge, uint32_t* nonce, BYTE* result)
 {
     memcpy(result, chanllenge, 32);
     BYTE* nonce2 = (BYTE*)addUint256(nonce, uint32_t(1266523343));
@@ -408,7 +408,7 @@ void kernal_pack_argument_test(BYTE* chanllenge, uint32_t* nonce, BYTE* result)
     delete nonce2;
 }
 
-extern "C" __global__ void kernel_lilypad_pow(BYTE* chanllenge, uint32_t* startNonce,  uint32_t* target,  WORD n_batch, BYTE* resNonce, BYTE* hash, BYTE* pack)
+extern "C" __global__  void kernel_lilypad_pow(BYTE* chanllenge, uint32_t* startNonce,  uint32_t* target,  WORD n_batch, BYTE* resNonce, BYTE* hash, BYTE* pack)
 {
     WORD thread = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread >= n_batch)
@@ -434,6 +434,7 @@ extern "C" __global__ void kernel_lilypad_pow(BYTE* chanllenge, uint32_t* startN
 
     reverse32BytesInPlace(out);
     if (hashbelowtarget((uint32_t*)out, target)) {
+           reverse32BytesInPlace(out);
         memcpy(pack, in, 64);
         memcpy(hash, out, 32);
         memcpy(resNonce, nonce, 32);

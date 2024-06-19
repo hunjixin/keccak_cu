@@ -56,7 +56,6 @@ func runPow(ctx context.Context) error {
 		panic(err)
 	}
 	fmt.Println("difficulty ", difficulty.String())
-	fmt.Println("hashnumber ", hashNumber.ToBig().String())
 	fmt.Println("nonce result", resultNonce.String())
 
 	if hashNumber.ToBig().Cmp(difficulty) == -1 {
