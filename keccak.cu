@@ -142,40 +142,18 @@ __device__ void cuda_keccak_permutations(cuda_keccak_ctx_t *ctx) {
 }
 
 
-__device__ void cuda_keccak_absorb(cuda_keccak_ctx_t *ctx, uint8_t* in)
-{
-
-    uint64_t offset = 0;
-    for (uint64_t i = 0; i < absorb_round; ++i) {//10
-        ctx->state[i] ^= cuda_keccak_leuint64(in + offset);//18
-        offset += 8;//9
-    }
-
-    cuda_keccak_permutations(ctx);//8
-}
-
 __device__ void cuda_keccak_pad(cuda_keccak_ctx_t *ctx)
 {
-    ctx->q[ctx->bits_in_queue >> 3] |= (1L << (ctx->bits_in_queue & 7)); //6
-
-    if (++(ctx->bits_in_queue) == rate_bits) {//9
-        cuda_keccak_absorb(ctx, ctx->q);//8
-        ctx->bits_in_queue = 0;//53
-    }
-
-    uint64_t full = ctx->bits_in_queue >> 6;    //7
-    uint64_t partial = ctx->bits_in_queue & 63; //8
+    ctx->q[512 >> 3] |= (1L << (512 & 7)); 
 
     uint64_t offset = 0;
-    for (int i = 0; i < full; ++i) {//52
-        ctx->state[i] ^= cuda_keccak_leuint64(ctx->q + offset);//52
-        offset += 8;//52
+    for (int i = 0; i < 8; ++i) {
+        ctx->state[i] ^= cuda_keccak_leuint64(ctx->q + offset);
+        offset += 8;
     }
 
-    if (partial > 0) {//8
-        uint64_t mask = (1L << partial) - 1;//17
-        ctx->state[full] ^= cuda_keccak_leuint64(ctx->q + offset) & mask;//16
-    }
+    uint64_t mask = (1L << 1) - 1;//17
+    ctx->state[8] ^= cuda_keccak_leuint64(ctx->q + offset) & mask;//16
 
     ctx->state[(rate_bits - 1) >> 6] ^= 9223372036854775808ULL;/* 1 << 63 */   //9
 
@@ -195,38 +173,11 @@ __device__ void cuda_keccak_init(cuda_keccak_ctx_t *ctx)
     ctx->bits_in_queue = 0;//11
 }
 
-__device__ void cuda_keccak_update(cuda_keccak_ctx_t *ctx, uint8_t *in, uint64_t inlen)
-{
-    int64_t BYTEs = ctx->bits_in_queue >> 3;
-    int64_t count = 0;
-    while (count < inlen) {//46
-        if (BYTEs == 0 && count <= ((int64_t)(inlen - rate_BYTEs))) {//12
-            do {
-                cuda_keccak_absorb(ctx, in + count);//8
-                count += rate_BYTEs;//56
-            } while (count <= ((int64_t)(inlen - rate_BYTEs)));//46
-        } else {
-            int64_t partial = cuda_keccak_MIN(rate_BYTEs - BYTEs, inlen - count);//12
-            memcpy(ctx->q + BYTEs, in + count, partial);//12
-
-            BYTEs += partial;//10
-            count += partial;//8
-
-            if (BYTEs == rate_BYTEs) {//10
-                cuda_keccak_absorb(ctx, ctx->q);//8
-                BYTEs = 0;
-            }
-        }
-    }
-    ctx->bits_in_queue = BYTEs << 3;//8
-}
-
 __device__ void cuda_keccak_final_rev(cuda_keccak_ctx_t *ctx, uint8_t *out)
 {
     cuda_keccak_pad(ctx);
     uint64_t i = 0;//6
-
-    while (i < digestbitlen) {//46
+    while (i < 256) {//46
         if (ctx->bits_in_queue == 0) {//9
             cuda_keccak_permutations(ctx);//8
             cuda_keccak_extract(ctx);//56
@@ -302,20 +253,19 @@ extern "C" __global__
         return;
     }
 
-    //pack input
-    uint8_t in[64];
-    memcpy(in, chanllenge, 32);
     //increase nonce
     uint8_t* nonce = (uint8_t*)addUint256(startNonce, thread);//35
     uint8_t nonce_rev[32];
     reverse32BytesInPlace(nonce, nonce_rev);//18
-    memcpy(in+32, nonce_rev, 32);
-    
 
     uint8_t out[32];
     CUDA_KECCAK_CTX ctx;
-    cuda_keccak_init(&ctx);        //6
-    cuda_keccak_update(&ctx, in,64);   //12
+    cuda_keccak_init(&ctx);       
+    
+    memcpy(ctx.q , chanllenge , 32);
+    memcpy(ctx.q+32 , nonce_rev , 32);
+    ctx.bits_in_queue = 64 << 3;
+
     cuda_keccak_final_rev(&ctx, out);       //6
 
     if (hashbelowtarget((uint64_t*)out, target)) {//49
@@ -336,26 +286,25 @@ extern "C" __global__
         return;
     }
 
-    //pack input
-    uint8_t in[64];
-    memcpy(in, chanllenge, 32);
-    //increase nonce
+       //increase nonce
     uint8_t* nonce = (uint8_t*)addUint256(startNonce, thread);//35
     uint8_t nonce_rev[32];
     reverse32BytesInPlace(nonce, nonce_rev);//18
-    memcpy(in+32, nonce_rev, 32);
-    
 
     uint8_t out[32];
     CUDA_KECCAK_CTX ctx;
-    cuda_keccak_init(&ctx);        //6
-    cuda_keccak_update(&ctx, in,64);   //12
+    cuda_keccak_init(&ctx);       
+    
+    memcpy(ctx.q , chanllenge , 32);
+    memcpy(ctx.q+32 , nonce_rev , 32);
+    ctx.bits_in_queue = 64 << 3;
+
     cuda_keccak_final_rev(&ctx, out);       //6
 
     if (hashbelowtarget((uint64_t*)out, target)) {//49
-      //  uint8_t out_rev[64];
-      //  reverse32BytesInPlace(out, out_rev);//18
-       // memcpy(hash, out_rev, 32);
+       uint8_t out_rev[64];
+        reverse32BytesInPlace(out, out_rev);//18
+        memcpy(hash, out_rev, 32);
       //  memcpy(pack, in, 64);
         memcpy(resNonce, nonce_rev, 32);
     } 
