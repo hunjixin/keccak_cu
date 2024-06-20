@@ -7,6 +7,8 @@ import (
 	"fmt"
 )
 
+var debug = false
+
 func main() {
 
 	fmt.Println(runPow(context.Background()))

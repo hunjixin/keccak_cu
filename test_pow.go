@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
-	"os"
 	"time"
 
 	"github.com/ethereum/go-ethereum/crypto"
@@ -15,53 +14,83 @@ import (
 )
 
 func runPow(ctx context.Context) error {
-	file, err := os.ReadFile("keccak.ptx")
+	dev2, _ := cu.GetDevice(0)
+	fmt.Println(dev2.Attributes(cu.MaxBlockDimX, cu.MaxBlockDimX))
+
+	cuCtx, err := setupGPU()
+	if err != nil {
+		fmt.Println("xxx")
+		return err
+	}
+	defer cuCtx.Close()
+
+	module, err := cuCtx.Load("keccak.ptx")
 	if err != nil {
 		return err
 	}
 
-	_, _, err = testSetup()
+	fn, err := module.Function("kernel_lilypad_pow_debug")
 	if err != nil {
-		return err
-	}
-
-	module, err := cu.LoadData(string(file))
-	if err != nil {
-		return err
-	}
-
-	fn, err := module.Function("kernel_lilypad_pow")
-	if err != nil {
-		fmt.Println(":xxxxx")
+		fmt.Println("not found")
 		return err
 	}
 
 	challenge := [32]byte{}
 	rand.Read(challenge[:])
-	nonce, _ := new(big.Int).SetString("384945743861236579867968647573457271936748661346785439674583967542", 10)
-	difficulty, _ := new(big.Int).SetString("57896044618658097711785492504343953926634992332820282019728792003956564819967", 10)
-	resultNonce, err := kernel_lilypad_pow(fn, challenge, nonce, difficulty, 1)
-	if err != nil {
-		return err
+	//										 115792089237316195423570985008687907853269984665640564039457584007913129639935
+	difficulty, _ := new(big.Int).SetString("22218427984885498939301134297976940326682563263165995655665287168", 10)
+	//2221842798488549893930113429797694032668256326301844165995655665287168
+	startNonce, _ := new(big.Int).SetString("38494386881236579867968611199111111111865446613467851139674583965", 10)
+	count := 0
+	nowT := time.Now()
+
+	thread := 32
+	block := 512
+	batch := thread * block * 1000
+	for {
+		resultNonce, err := kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, thread, block) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
+		if err != nil {
+			return err
+		}
+		err = cuCtx.Error()
+		if err != nil {
+			fmt.Println(err)
+			return nil
+		}
+
+		count += batch
+		if count%(batch*10) == 0 {
+			secs := time.Since(nowT).Seconds()
+			if secs > 0 {
+				fmt.Println("speed m", float64(count/1000/1000)/secs)
+			}
+		}
+		startNonce = new(big.Int).Add(startNonce, big.NewInt(int64(batch)))
+		if resultNonce.BitLen() == 0 {
+			fmt.Println("not found ", startNonce.String())
+			continue
+			//return nil
+		}
+
+		//verify
+		hashNumber, err := calculateHashNumber(challenge, resultNonce)
+		if err != nil {
+			panic(err)
+		}
+
+		if hashNumber.ToBig().Cmp(difficulty) == -1 {
+			fmt.Println("********* find nonce ******")
+			fmt.Println("gap ", new(big.Int).Sub(resultNonce, startNonce).String())
+			fmt.Println("difficulty ", difficulty.String())
+			fmt.Println("hashResult ", hashNumber.String())
+			fmt.Println("nonce result", resultNonce.String())
+			return nil
+		} else {
+			panic("should never happen")
+		}
+
 	}
 
-	if resultNonce.BitLen() == 0 {
-		fmt.Println("not found")
-		return nil
-	}
-
-	//verify
-	hashNumber, err := calculateHashNumber(challenge, resultNonce)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("difficulty ", difficulty.String())
-	fmt.Println("nonce result", resultNonce.String())
-
-	if hashNumber.ToBig().Cmp(difficulty) == -1 {
-		panic("err")
-	}
-	time.Sleep(time.Hour)
 	return nil
 }
 
@@ -71,10 +100,19 @@ func calculateHashNumber(challenge [32]byte, nonce *big.Int) (*uint256.Int, erro
 		return nil, err
 	}
 
-	fmt.Println("cpu pack result:", hex.EncodeToString(data))
+	if debug {
+
+		fmt.Println("cpu pack result:", hex.EncodeToString(data))
+	}
+
 	// Calculate Keccak-256 hash
 	hashResult := crypto.Keccak256(data)
-	fmt.Println("cpu hash result:", hex.EncodeToString(hashResult))
+
+	if debug {
+
+		fmt.Println("cpu hash result:", hex.EncodeToString(hashResult))
+	}
+
 	fmt.Println("hashnumber ", new(uint256.Int).SetBytes(hashResult).String())
 	return new(uint256.Int).SetBytes(hashResult), nil
 }
