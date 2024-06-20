@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-var debug = false
+var debug = true
 
 func main() {
 
