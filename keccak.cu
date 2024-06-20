@@ -29,6 +29,7 @@ __constant__  uint64_t digestbitlen = 256;
 __constant__  uint64_t rate_bits = 1088;
 __constant__  uint64_t rate_BYTEs = 136;
 __constant__  uint64_t absorb_round = 17;
+
 typedef struct {
     int64_t state[KECCAK_STATE_SIZE];
     uint8_t q[KECCAK_Q_SIZE];
@@ -293,7 +294,7 @@ __device__ void reverse32BytesInPlace(uint8_t *data, uint8_t *out)
     }
 }
 
-extern "C" __global__  __launch_bounds__(1024)
+extern "C" __global__ 
   void kernel_lilypad_pow(uint8_t* chanllenge, uint64_t* startNonce,  uint64_t* target, uint32_t n_batch, uint8_t* resNonce)
 {
     uint64_t thread = blockIdx.x * blockDim.x + threadIdx.x; //4
@@ -326,7 +327,7 @@ extern "C" __global__  __launch_bounds__(1024)
 }
 
 
-extern "C" __global__  __launch_bounds__(1024)
+extern "C" __global__
 
   void kernel_lilypad_pow_debug(uint8_t* chanllenge, uint64_t* startNonce,  uint64_t* target, uint32_t n_batch, uint8_t* resNonce,  uint8_t *hash, uint8_t *pack)
 {
