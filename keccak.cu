@@ -26,7 +26,6 @@ __constant__ LONG CUDA_KECCAK_CONSTS[24] = { 0x0000000000000001, 0x0000000000008
 
 typedef struct {
 
-    BYTE sha3_flag;
     WORD digestbitlen;
     LONG rate_bits;
     LONG rate_BYTEs;
@@ -71,12 +70,12 @@ __device__ void cuda_keccak_extract(cuda_keccak_ctx_t *ctx)
     }
 }
 
-__device__ __forceinline__ LONG cuda_keccak_ROTL64(LONG a, LONG  b)
+__device__ __forceinline__ LONG cuda_keccak_ROTL64(LONG a, LONG  b)  
 {
-    return (a << b) | (a >> (64 - b));
+    return (a << b) | (a >> (64 - b)); //72
 }
 
-__device__ void cuda_keccak_permutations(cuda_keccak_ctx_t * ctx)
+__device__ void cuda_keccak_permutations(cuda_keccak_ctx_t * ctx)  //this function use more 70
 {
 
     int64_t* A = ctx->state;;
@@ -87,22 +86,22 @@ __device__ void cuda_keccak_permutations(cuda_keccak_ctx_t * ctx)
     int64_t *a15 = A + 15, *a16 = A + 16, *a17 = A + 17, *a18 = A + 18, *a19 = A + 19;
     int64_t *a20 = A + 20, *a21 = A + 21, *a22 = A + 22, *a23 = A + 23, *a24 = A + 24;
 
-    for (int i = 0; i < KECCAK_ROUND; i++) {
+    for (int i = 0; i < KECCAK_ROUND; i++) {   //65
 
-        /* Theta */
-        int64_t c0 = *a00 ^ *a05 ^ *a10 ^ *a15 ^ *a20;
-        int64_t c1 = *a01 ^ *a06 ^ *a11 ^ *a16 ^ *a21;
-        int64_t c2 = *a02 ^ *a07 ^ *a12 ^ *a17 ^ *a22;
-        int64_t c3 = *a03 ^ *a08 ^ *a13 ^ *a18 ^ *a23;
-        int64_t c4 = *a04 ^ *a09 ^ *a14 ^ *a19 ^ *a24;
+        /* Theta */ 
+        int64_t c0 = *a00 ^ *a05 ^ *a10 ^ *a15 ^ *a20;  //71
+        int64_t c1 = *a01 ^ *a06 ^ *a11 ^ *a16 ^ *a21;  //62
+        int64_t c2 = *a02 ^ *a07 ^ *a12 ^ *a17 ^ *a22;  //69
+        int64_t c3 = *a03 ^ *a08 ^ *a13 ^ *a18 ^ *a23;  //71
+        int64_t c4 = *a04 ^ *a09 ^ *a14 ^ *a19 ^ *a24;  //62
 
-        int64_t d1 = cuda_keccak_ROTL64(c1, 1) ^ c4;
-        int64_t d2 = cuda_keccak_ROTL64(c2, 1) ^ c0;
-        int64_t d3 = cuda_keccak_ROTL64(c3, 1) ^ c1;
-        int64_t d4 = cuda_keccak_ROTL64(c4, 1) ^ c2;
-        int64_t d0 = cuda_keccak_ROTL64(c0, 1) ^ c3;
+        int64_t d1 = cuda_keccak_ROTL64(c1, 1) ^ c4;    //71
+        int64_t d2 = cuda_keccak_ROTL64(c2, 1) ^ c0;    //71
+        int64_t d3 = cuda_keccak_ROTL64(c3, 1) ^ c1;    //72
+        int64_t d4 = cuda_keccak_ROTL64(c4, 1) ^ c2;    //72
+        int64_t d0 = cuda_keccak_ROTL64(c0, 1) ^ c3;    //72
 
-        *a00 ^= d1;
+        *a00 ^= d1; //64
         *a05 ^= d1;
         *a10 ^= d1;
         *a15 ^= d1;
@@ -123,13 +122,13 @@ __device__ void cuda_keccak_permutations(cuda_keccak_ctx_t * ctx)
         *a18 ^= d4;
         *a23 ^= d4;
         *a04 ^= d0;
-        *a09 ^= d0;
+        *a09 ^= d0; //72
         *a14 ^= d0;
         *a19 ^= d0;
-        *a24 ^= d0;
+        *a24 ^= d0; //69
 
         /* Rho pi */
-        c1 = cuda_keccak_ROTL64(*a01, 1);
+        c1 = cuda_keccak_ROTL64(*a01, 1);   //63
         *a01 = cuda_keccak_ROTL64(*a06, 44);
         *a06 = cuda_keccak_ROTL64(*a09, 20);
         *a09 = cuda_keccak_ROTL64(*a22, 61);
@@ -152,52 +151,52 @@ __device__ void cuda_keccak_permutations(cuda_keccak_ctx_t * ctx)
         *a18 = cuda_keccak_ROTL64(*a17, 15);
         *a17 = cuda_keccak_ROTL64(*a11, 10);
         *a11 = cuda_keccak_ROTL64(*a07, 6);
-        *a07 = cuda_keccak_ROTL64(*a10, 3);
+        *a07 = cuda_keccak_ROTL64(*a10, 3); //61
         *a10 = c1;
 
         /* Chi */
-        c0 = *a00 ^ (~*a01 & *a02);
-        c1 = *a01 ^ (~*a02 & *a03);
-        *a02 ^= ~*a03 & *a04;
-        *a03 ^= ~*a04 & *a00;
-        *a04 ^= ~*a00 & *a01;
+        c0 = *a00 ^ (~*a01 & *a02); //68
+        c1 = *a01 ^ (~*a02 & *a03); //65
+        *a02 ^= ~*a03 & *a04;   //64
+        *a03 ^= ~*a04 & *a00;   //66
+        *a04 ^= ~*a00 & *a01;   //67
         *a00 = c0;
         *a01 = c1;
 
-        c0 = *a05 ^ (~*a06 & *a07);
-        c1 = *a06 ^ (~*a07 & *a08);
-        *a07 ^= ~*a08 & *a09;
-        *a08 ^= ~*a09 & *a05;
-        *a09 ^= ~*a05 & *a06;
-        *a05 = c0;
-        *a06 = c1;
+        c0 = *a05 ^ (~*a06 & *a07); //64
+        c1 = *a06 ^ (~*a07 & *a08);//65
+        *a07 ^= ~*a08 & *a09;//66
+        *a08 ^= ~*a09 & *a05;//66
+        *a09 ^= ~*a05 & *a06;//67
+        *a05 = c0;//58
+        *a06 = c1;//54
 
-        c0 = *a10 ^ (~*a11 & *a12);
-        c1 = *a11 ^ (~*a12 & *a13);
-        *a12 ^= ~*a13 & *a14;
-        *a13 ^= ~*a14 & *a10;
-        *a14 ^= ~*a10 & *a11;
-        *a10 = c0;
-        *a11 = c1;
+        c0 = *a10 ^ (~*a11 & *a12);//66
+        c1 = *a11 ^ (~*a12 & *a13);//66
+        *a12 ^= ~*a13 & *a14;//66
+        *a13 ^= ~*a14 & *a10;//66
+        *a14 ^= ~*a10 & *a11;//66
+        *a10 = c0;//56
+        *a11 = c1;//54
 
-        c0 = *a15 ^ (~*a16 & *a17);
-        c1 = *a16 ^ (~*a17 & *a18);
-        *a17 ^= ~*a18 & *a19;
-        *a18 ^= ~*a19 & *a15;
-        *a19 ^= ~*a15 & *a16;
-        *a15 = c0;
-        *a16 = c1;
+        c0 = *a15 ^ (~*a16 & *a17);//66
+        c1 = *a16 ^ (~*a17 & *a18);//66
+        *a17 ^= ~*a18 & *a19;//65
+        *a18 ^= ~*a19 & *a15;//66
+        *a19 ^= ~*a15 & *a16;//66
+        *a15 = c0;//56
+        *a16 = c1;//56
 
-        c0 = *a20 ^ (~*a21 & *a22);
-        c1 = *a21 ^ (~*a22 & *a23);
-        *a22 ^= ~*a23 & *a24;
-        *a23 ^= ~*a24 & *a20;
-        *a24 ^= ~*a20 & *a21;
-        *a20 = c0;
-        *a21 = c1;
+        c0 = *a20 ^ (~*a21 & *a22);//64
+        c1 = *a21 ^ (~*a22 & *a23);//66
+        *a22 ^= ~*a23 & *a24;//65
+        *a23 ^= ~*a24 & *a20;//65
+        *a24 ^= ~*a20 & *a21;//66
+        *a20 = c0;//56
+        *a21 = c1;//51
 
         /* Iota */
-        *a00 ^= CUDA_KECCAK_CONSTS[i];
+        *a00 ^= CUDA_KECCAK_CONSTS[i]; //65
     }
 }
 
@@ -206,43 +205,43 @@ __device__ void cuda_keccak_absorb(cuda_keccak_ctx_t *ctx, BYTE* in)
 {
 
     LONG offset = 0;
-    for (LONG i = 0; i < ctx->absorb_round; ++i) {
-        ctx->state[i] ^= cuda_keccak_leuint64(in + offset);
-        offset += 8;
+    for (LONG i = 0; i < ctx->absorb_round; ++i) {//10
+        ctx->state[i] ^= cuda_keccak_leuint64(in + offset);//18
+        offset += 8;//9
     }
 
-    cuda_keccak_permutations(ctx);
+    cuda_keccak_permutations(ctx);//8
 }
 
 __device__ void cuda_keccak_pad(cuda_keccak_ctx_t *ctx)
 {
-    ctx->q[ctx->bits_in_queue >> 3] |= (1L << (ctx->bits_in_queue & 7));
+    ctx->q[ctx->bits_in_queue >> 3] |= (1L << (ctx->bits_in_queue & 7)); //6
 
-    if (++(ctx->bits_in_queue) == ctx->rate_bits) {
-        cuda_keccak_absorb(ctx, ctx->q);
-        ctx->bits_in_queue = 0;
+    if (++(ctx->bits_in_queue) == ctx->rate_bits) {//9
+        cuda_keccak_absorb(ctx, ctx->q);//8
+        ctx->bits_in_queue = 0;//53
     }
 
-    LONG full = ctx->bits_in_queue >> 6;
-    LONG partial = ctx->bits_in_queue & 63;
+    LONG full = ctx->bits_in_queue >> 6;    //7
+    LONG partial = ctx->bits_in_queue & 63; //8
 
     LONG offset = 0;
-    for (int i = 0; i < full; ++i) {
-        ctx->state[i] ^= cuda_keccak_leuint64(ctx->q + offset);
-        offset += 8;
+    for (int i = 0; i < full; ++i) {//52
+        ctx->state[i] ^= cuda_keccak_leuint64(ctx->q + offset);//52
+        offset += 8;//52
     }
 
-    if (partial > 0) {
-        LONG mask = (1L << partial) - 1;
-        ctx->state[full] ^= cuda_keccak_leuint64(ctx->q + offset) & mask;
+    if (partial > 0) {//8
+        LONG mask = (1L << partial) - 1;//17
+        ctx->state[full] ^= cuda_keccak_leuint64(ctx->q + offset) & mask;//16
     }
 
-    ctx->state[(ctx->rate_bits - 1) >> 6] ^= 9223372036854775808ULL;/* 1 << 63 */
+    ctx->state[(ctx->rate_bits - 1) >> 6] ^= 9223372036854775808ULL;/* 1 << 63 */   //9
 
-    cuda_keccak_permutations(ctx);
-    cuda_keccak_extract(ctx);
+    cuda_keccak_permutations(ctx);//8
+    cuda_keccak_extract(ctx);//58
 
-    ctx->bits_in_queue = ctx->rate_bits;
+    ctx->bits_in_queue = ctx->rate_bits;//37
 }
 
 /*
@@ -251,71 +250,55 @@ __device__ void cuda_keccak_pad(cuda_keccak_ctx_t *ctx)
 __device__ void cuda_keccak_init(cuda_keccak_ctx_t *ctx, WORD digestbitlen)
 {
     memset(ctx, 0, sizeof(cuda_keccak_ctx_t));
-    ctx->sha3_flag = 0;
-    ctx->digestbitlen = digestbitlen;
-    ctx->rate_bits = 1600 - ((ctx->digestbitlen) << 1);
-    ctx->rate_BYTEs = ctx->rate_bits >> 3;
-    ctx->absorb_round = ctx->rate_bits >> 6;
-    ctx->bits_in_queue = 0;
-}
-
-/*
- * Digestbitlen must be 224 256 384 512
- */
-__device__ void cuda_keccak_sha3_init(cuda_keccak_ctx_t *ctx, WORD digestbitlen)
-{
-    cuda_keccak_init(ctx, digestbitlen);
-    ctx->sha3_flag = 1;
+    ctx->digestbitlen = digestbitlen;   //11
+    ctx->rate_bits = 1600 - ((ctx->digestbitlen) << 1);//10
+    ctx->rate_BYTEs = ctx->rate_bits >> 3;//8
+    ctx->absorb_round = ctx->rate_bits >> 6;//10
+    ctx->bits_in_queue = 0;//11
 }
 
 __device__ void cuda_keccak_update(cuda_keccak_ctx_t *ctx, BYTE *in, LONG inlen)
 {
     int64_t BYTEs = ctx->bits_in_queue >> 3;
     int64_t count = 0;
-    while (count < inlen) {
-        if (BYTEs == 0 && count <= ((int64_t)(inlen - ctx->rate_BYTEs))) {
+    while (count < inlen) {//46
+        if (BYTEs == 0 && count <= ((int64_t)(inlen - ctx->rate_BYTEs))) {//12
             do {
-                cuda_keccak_absorb(ctx, in + count);
-                count += ctx->rate_BYTEs;
-            } while (count <= ((int64_t)(inlen - ctx->rate_BYTEs)));
+                cuda_keccak_absorb(ctx, in + count);//8
+                count += ctx->rate_BYTEs;//56
+            } while (count <= ((int64_t)(inlen - ctx->rate_BYTEs)));//46
         } else {
-            int64_t partial = cuda_keccak_MIN(ctx->rate_BYTEs - BYTEs, inlen - count);
-            memcpy(ctx->q + BYTEs, in + count, partial);
+            int64_t partial = cuda_keccak_MIN(ctx->rate_BYTEs - BYTEs, inlen - count);//12
+            memcpy(ctx->q + BYTEs, in + count, partial);//12
 
-            BYTEs += partial;
-            count += partial;
+            BYTEs += partial;//10
+            count += partial;//8
 
-            if (BYTEs == ctx->rate_BYTEs) {
-                cuda_keccak_absorb(ctx, ctx->q);
+            if (BYTEs == ctx->rate_BYTEs) {//10
+                cuda_keccak_absorb(ctx, ctx->q);//8
                 BYTEs = 0;
             }
         }
     }
-    ctx->bits_in_queue = BYTEs << 3;
+    ctx->bits_in_queue = BYTEs << 3;//8
 }
 
 __device__ void cuda_keccak_final(cuda_keccak_ctx_t *ctx, BYTE *out)
 {
-    if (ctx->sha3_flag) {
-        int mask = (1 << 2) - 1;
-        ctx->q[ctx->bits_in_queue >> 3] = (BYTE)(0x02 & mask);
-        ctx->bits_in_queue += 2;
-    }
-
     cuda_keccak_pad(ctx);
-    LONG i = 0;
+    LONG i = 0;//6
 
-    while (i < ctx->digestbitlen) {
-        if (ctx->bits_in_queue == 0) {
-            cuda_keccak_permutations(ctx);
-            cuda_keccak_extract(ctx);
-            ctx->bits_in_queue = ctx->rate_bits;
+    while (i < ctx->digestbitlen) {//46
+        if (ctx->bits_in_queue == 0) {//9
+            cuda_keccak_permutations(ctx);//8
+            cuda_keccak_extract(ctx);//56
+            ctx->bits_in_queue = ctx->rate_bits;//7
         }
 
-        LONG partial_block = cuda_keccak_UMIN(ctx->bits_in_queue, ctx->digestbitlen - i);
-        memcpy(out + (i >> 3), ctx->q + (ctx->rate_BYTEs - (ctx->bits_in_queue >> 3)), partial_block >> 3);
-        ctx->bits_in_queue -= partial_block;
-        i += partial_block;
+        LONG partial_block = cuda_keccak_UMIN(ctx->bits_in_queue, ctx->digestbitlen - i);//9
+        memcpy(out + (i >> 3), ctx->q + (ctx->rate_BYTEs - (ctx->bits_in_queue >> 3)), partial_block >> 3);//17
+        ctx->bits_in_queue -= partial_block;//11
+        i += partial_block;//11
     }
 }
 
@@ -323,20 +306,20 @@ __device__ void cuda_keccak_final(cuda_keccak_ctx_t *ctx, BYTE *out)
 
 __device__ __forceinline__ static bool hashbelowtarget(const uint64_t *const __restrict__ hash, const uint64_t *const __restrict__ target)
 {
-    if (hash[3] > target[3])
+    if (hash[3] > target[3])//46
         return false;
-    if (hash[3] < target[3])
+    if (hash[3] < target[3])//46
         return true;
-    if (hash[2] > target[2])
+    if (hash[2] > target[2])//45
         return false;
-    if (hash[2] < target[2])
+    if (hash[2] < target[2])//45
         return true;
 
-    if (hash[1] > target[1])
+    if (hash[1] > target[1])//43
         return false;
-    if (hash[1] < target[1])
+    if (hash[1] < target[1])//43
         return true;
-    if (hash[0] > target[0])
+    if (hash[0] > target[0])//39
         return false;
 
     return true;
@@ -344,25 +327,26 @@ __device__ __forceinline__ static bool hashbelowtarget(const uint64_t *const __r
 
 __device__ uint64_t *addUint256(const uint64_t *a, const uint64_t b)
 {
-    uint64_t *result = new uint64_t[4];
-    uint64_t sum = a[0] + b;
-    result[0] = sum;
+    uint64_t *result = new uint64_t[4];//47
+    uint64_t sum = a[0] + b;//10
+    result[0] = sum;//10
 
-    uint64_t carry = (sum < a[0]) ? 1 : 0;
-    for (int i = 1; i < 4; i++)
+    uint64_t carry = (sum < a[0]) ? 1 : 0;//12
+    for (int i = 1; i < 4; i++)//13
     {
-        sum = a[i] + carry;
-        result[i] = sum;
-        carry = (sum < a[i]) ? 1 : 0;
+        sum = a[i] + carry;//16
+        result[i] = sum;//14
+        carry = (sum < a[i]) ? 1 : 0;//14
     }
 
     return result;
 }
 __device__ void reverse32BytesInPlace(uint8_t *data)
 {
+    uint8_t temp;
     for (int i = 0; i < 16; i++)
     {
-        uint8_t temp = data[i];
+        temp = data[i];
         data[i] = data[31 - i];
         data[31 - i] = temp;
     }
@@ -421,11 +405,12 @@ extern "C" __global__  void kernel_lilypad_pow(BYTE* chanllenge, uint64_t* start
 }
 
 
+//寄存器大小4字节
 
 extern "C" __global__  void kernel_lilypad_pow_debug(BYTE* chanllenge, uint64_t* startNonce,  uint64_t* target, WORD n_batch, BYTE* resNonce,  BYTE *hash, BYTE *pack)
 {
-    WORD thread = blockIdx.x * blockDim.x + threadIdx.x;
-    if (thread >= n_batch) {
+    WORD thread = blockIdx.x * blockDim.x + threadIdx.x; //4
+    if (thread >= n_batch) {//36
         return;
     }
 
@@ -433,24 +418,24 @@ extern "C" __global__  void kernel_lilypad_pow_debug(BYTE* chanllenge, uint64_t*
     BYTE in[64];
     memcpy(in, chanllenge, 32);
     //increase nonce
-    BYTE* nonce = (BYTE*)addUint256(startNonce, thread);
-    reverse32BytesInPlace(nonce);
+    BYTE* nonce = (BYTE*)addUint256(startNonce, thread);//35
+    reverse32BytesInPlace(nonce);//18
     memcpy(in+32, nonce, 32);
 
     BYTE out[32];
     CUDA_KECCAK_CTX ctx;
-    cuda_keccak_init(&ctx, 256);
-    cuda_keccak_update(&ctx, in, 64);
-    cuda_keccak_final(&ctx, out);
+    cuda_keccak_init(&ctx, 256);        //6
+    cuda_keccak_update(&ctx, in, 64);   //12
+    cuda_keccak_final(&ctx, out);       //6
 
-    reverse32BytesInPlace(out);
-    if (hashbelowtarget((uint64_t*)out, target)) {
-        reverse32BytesInPlace(out);
+    reverse32BytesInPlace(out);  //15
+    if (hashbelowtarget((uint64_t*)out, target)) {//49
+        reverse32BytesInPlace(out);//36
         memcpy(hash, out, 32);
 
         memcpy(pack, in, 64);
         
         memcpy(resNonce, nonce, 32);
     } 
-    delete nonce;
+    delete nonce;//45
 }
