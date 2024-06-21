@@ -60,15 +60,14 @@ __device__ uint64_t cuda_keccak_UMIN(uint64_t a, uint64_t b)
 
 __device__ void cuda_keccak_extract(cuda_keccak_ctx_t *ctx)
 {
-    uint64_t len = rate_bits >> 6;
     int64_t a;
     int s = sizeof(uint64_t);
-
-    for (int i = 0;i < len;i++) {
+    for (int i = 0;i < 17;i++) {
         a = cuda_keccak_leuint64((int64_t*)&ctx->state[i]);
         memcpy(ctx->q + (i * s), &a, s);
     }
 }
+
 __device__ __forceinline__ uint64_t cuda_keccak_ROTL64(uint64_t a, uint64_t b) {
     return (a << b) | (a >> (64 - b));
 }
@@ -144,23 +143,25 @@ __device__ void cuda_keccak_permutations(cuda_keccak_ctx_t *ctx) {
 
 __device__ void cuda_keccak_pad(cuda_keccak_ctx_t *ctx)
 {
-    ctx->q[512 >> 3] |= (1L << (512 & 7)); 
-
+    //0-7 uint64 = 64 bytes
     uint64_t offset = 0;
     for (int i = 0; i < 8; ++i) {
         ctx->state[i] ^= cuda_keccak_leuint64(ctx->q + offset);
         offset += 8;
     }
 
+    //64th bytes
+    ctx->q[64] |= (1L << (512 & 7)); 
     uint64_t mask = (1L << 1) - 1;//17
-    ctx->state[8] ^= cuda_keccak_leuint64(ctx->q + offset) & mask;//16
+    ctx->state[8] ^= cuda_keccak_leuint64(ctx->q + 64) & mask;//16
 
-    ctx->state[(rate_bits - 1) >> 6] ^= 9223372036854775808ULL;/* 1 << 63 */   //9
+    //16 byte, 1024 bytes
+    ctx->state[16] ^= 9223372036854775808ULL;/* 1 << 63 */   //9
 
     cuda_keccak_permutations(ctx);//8
     cuda_keccak_extract(ctx);//58
 
-    ctx->bits_in_queue = rate_bits;//37
+    ctx->bits_in_queue = 1088;//37
 }
 
 
@@ -176,6 +177,7 @@ __device__ void cuda_keccak_init(cuda_keccak_ctx_t *ctx)
 __device__ void cuda_keccak_final_rev(cuda_keccak_ctx_t *ctx, uint8_t *out)
 {
     cuda_keccak_pad(ctx);
+    
     uint64_t i = 0;//6
     while (i < 256) {//46
         if (ctx->bits_in_queue == 0) {//9
@@ -237,43 +239,13 @@ __device__ uint64_t *addUint256(const uint64_t *a, const uint64_t b)
 
     return result;
 }
-__device__ void reverse32BytesInPlace(uint8_t *data, uint8_t *out)
-{
-    for (int i = 0; i < 32; i++)//13
-    {
-       out[i] = data[31-i];
+
+__device__ void reverseArray(unsigned char *array, int n) {
+    for (int i = 0; i < n / 2; ++i) {
+        unsigned char temp = array[i];
+        array[i] = array[n - 1 - i];
+        array[n - 1 - i] = temp;
     }
-}
-
-extern "C" __global__ 
-  void kernel_lilypad_pow(uint8_t* chanllenge, uint64_t* startNonce,  uint64_t* target, uint32_t n_batch, uint8_t* resNonce)
-{
-    uint64_t thread = blockIdx.x * blockDim.x + threadIdx.x; //4
-    if (thread >= n_batch) {//36
-        return;
-    }
-
-    //increase nonce
-    uint8_t* nonce = (uint8_t*)addUint256(startNonce, thread);//35
-    uint8_t nonce_rev[32];
-    reverse32BytesInPlace(nonce, nonce_rev);//18
-
-    uint8_t out[32];
-    CUDA_KECCAK_CTX ctx;
-    cuda_keccak_init(&ctx);       
-    
-    memcpy(ctx.q , chanllenge , 32);
-    memcpy(ctx.q+32 , nonce_rev , 32);
-    ctx.bits_in_queue = 64 << 3;
-
-    cuda_keccak_final_rev(&ctx, out);       //6
-
-    if (hashbelowtarget((uint64_t*)out, target)) {//49
-        memcpy(resNonce, nonce_rev, 32);
-    } 
-
-    delete nonce;//45
-    delete nonce_rev;//45
 }
 
 
@@ -288,27 +260,28 @@ extern "C" __global__
 
        //increase nonce
     uint8_t* nonce = (uint8_t*)addUint256(startNonce, thread);//35
-    uint8_t nonce_rev[32];
-    reverse32BytesInPlace(nonce, nonce_rev);//18
 
     uint8_t out[32];
     CUDA_KECCAK_CTX ctx;
     cuda_keccak_init(&ctx);       
     
     memcpy(ctx.q , chanllenge , 32);
-    memcpy(ctx.q+32 , nonce_rev , 32);
+    for (int i = 32; i < 64; i++)//13
+    {
+      ctx.q[i] = nonce[63-i];
+    }
+    //memcpy(ctx.q+32 , nonce_rev , 32);
     ctx.bits_in_queue = 64 << 3;
 
     cuda_keccak_final_rev(&ctx, out);       //6
 
     if (hashbelowtarget((uint64_t*)out, target)) {//49
-       uint8_t out_rev[64];
-        reverse32BytesInPlace(out, out_rev);//18
-        memcpy(hash, out_rev, 32);
+        reverseArray(out, 32);//18
+        memcpy(hash, out, 32);
       //  memcpy(pack, in, 64);
-        memcpy(resNonce, nonce_rev, 32);
+        reverseArray(nonce,32);
+        memcpy(resNonce, nonce, 32);
     } 
 
     delete nonce;//45
-    delete nonce_rev;//45
 }

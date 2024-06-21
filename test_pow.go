@@ -44,9 +44,9 @@ func runPow(ctx context.Context) error {
 	count := 0
 	nowT := time.Now()
 
-	thread := 32
+	thread := 38
 	block := 512
-	batch := thread * block * 1000
+	batch := thread * block
 	for {
 		resultNonce, err := kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, thread, block) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
 		if err != nil {
