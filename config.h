@@ -21,3 +21,5 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <cuda_helper.h>
+#include <cuda_vectors.h>

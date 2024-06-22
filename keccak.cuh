@@ -10,3 +10,5 @@
 
 #pragma once
 #include "config.h"
+#include <cuda_helper.h>
+#include <cuda_vectors.h>
