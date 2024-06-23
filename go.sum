@@ -66,6 +66,8 @@ github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+
 github.com/gorgonia/bindgen v0.0.0-20210223094355-432cd89e7765/go.mod h1:BLHSe436vhQKRfm6wxJgebeK4fDY+ER/8jV3vVH9yYU=
 github.com/holiman/uint256 v1.2.4 h1:jUc4Nk8fm9jZabQuqr2JzednajVmBpC+oiTiXZJEApU=
 github.com/holiman/uint256 v1.2.4/go.mod h1:EOMSn4q6Nyt9P6efbI3bueV4e1b3dGlUCXeiRV4ng7E=
+github.com/hunjixin/cu v0.0.0-20240618140529-d11ba74b75b6 h1:cBUBkngmqWtdvTTy1YK39UPneUtIWm/gmbsiCkqzNd8=
+github.com/hunjixin/cu v0.0.0-20240618140529-d11ba74b75b6/go.mod h1:nR6RAm64n9htu6Orv1NVbsMJXHjnsC3SHPfgcxI08e4=
 github.com/jung-kurt/gofpdf v1.0.3-0.20190309125859-24315acbbda5/go.mod h1:7Id9E/uU8ce6rXgefFLlgrJj/GYY22cpxn+r32jIOes=
 github.com/kisielk/errcheck v1.2.0/go.mod h1:/BMXB+zMLi60iA8Vv6Ksmxu/1UDYcXs4uQLJ+jE2L00=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=

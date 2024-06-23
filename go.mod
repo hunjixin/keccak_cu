@@ -9,7 +9,7 @@ require (
 	gorgonia.org/cu v0.9.5
 )
 
-replace gorgonia.org/cu => C:\Users\hunji\code\cu
+replace gorgonia.org/cu => github.com/hunjixin/cu v0.0.0-20240618140529-d11ba74b75b6
 
 require (
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
