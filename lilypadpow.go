@@ -12,7 +12,7 @@ import (
 	"gorgonia.org/cu"
 )
 
-func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, batch uint64) (*big.Int, error) {
+func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, thread, block int) (*big.Int, error) {
 	dIn1, err := cuCtx.MemAllocManaged(32, cu.AttachGlobal)
 	if err != nil {
 		return nil, err
@@ -33,19 +33,8 @@ func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 		return nil, err
 	}
 
-	thread := 256
-	block := (int(batch) + thread - 1) / thread
-
-	cuCtx.MemcpyHtoD(dIn1, unsafe.Pointer(&challenge[0]), 32)
-
-	startNonceBytes := math.U256Bytes(startNonce)
-	slices.Reverse(startNonceBytes)
-	cuCtx.MemcpyHtoD(dIn2, unsafe.Pointer(&startNonceBytes[0]), 32)
-
-	difficutyBytes := math.U256Bytes(difficulty)
-	slices.Reverse(difficutyBytes) //to big
-	cuCtx.MemcpyHtoD(dIn3, unsafe.Pointer(&difficutyBytes[0]), 32)
-
+	batch := int64(thread * block)
+	//(BYTE* indata,	 WORD inlen,	 BYTE* outdata,	 WORD n_batch,	 WORD KECCAK_BLOCK_SIZE)
 	args := []unsafe.Pointer{
 		unsafe.Pointer(&dIn1),
 		unsafe.Pointer(&dIn2),
@@ -54,8 +43,15 @@ func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 		unsafe.Pointer(&dOut),
 	}
 
-	//thread := 256
-	//block := (int(inNum) + thread - 1) / thread
+	cuCtx.MemcpyHtoD(dIn1, unsafe.Pointer(&challenge[0]), 32)
+
+	startNonceBytes := math.U256Bytes(startNonce)
+	cuCtx.MemcpyHtoD(dIn2, unsafe.Pointer(&startNonceBytes[0]), 32)
+
+	difficutyBytes := math.U256Bytes(difficulty)
+	slices.Reverse(difficutyBytes) //to big
+	cuCtx.MemcpyHtoD(dIn3, unsafe.Pointer(&difficutyBytes[0]), 32)
+
 	cuCtx.LaunchKernel(fn, thread, 1, 1, block, 1, 1, 1, cu.Stream{}, args)
 	cuCtx.Synchronize()
 
@@ -65,8 +61,8 @@ func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 	cuCtx.MemFree(dIn1)
 	cuCtx.MemFree(dIn2)
 	cuCtx.MemFree(dIn3)
-	cuCtx.MemFree(dIn2)
 	cuCtx.MemFree(dOut)
+
 	return new(big.Int).SetBytes(hOut), nil
 }
 
@@ -116,7 +112,6 @@ func kernel_lilypad_pow_with_ctx_debug(cuCtx *cu.Ctx, fn cu.Function, challenge 
 	cuCtx.MemcpyHtoD(dIn1, unsafe.Pointer(&challenge[0]), 32)
 
 	startNonceBytes := math.U256Bytes(startNonce)
-	slices.Reverse(startNonceBytes)
 	cuCtx.MemcpyHtoD(dIn2, unsafe.Pointer(&startNonceBytes[0]), 32)
 
 	difficutyBytes := math.U256Bytes(difficulty)
