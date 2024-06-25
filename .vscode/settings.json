@@ -7,6 +7,8 @@
         "type_traits": "cpp",
         "vector": "cpp",
         "xhash": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "cmath": "cpp",
+        "iosfwd": "cpp"
     }
 }
