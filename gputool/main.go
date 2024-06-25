@@ -15,11 +15,13 @@ import (
 var grid int
 var block int
 var threadPerThread int
+var difficultyStr string
 
 func main() {
 	flag.IntVar(&grid, "grid", 38, "grid size")
 	flag.IntVar(&block, "block", 1024, "block size")
 	flag.IntVar(&threadPerThread, "hash_per_thread", 1, "hash to calculate per threads")
+	flag.StringVar(&difficultyStr, "difficulty", "222184279848854989393011342979769403266326301844165995655665287168", "difficulty")
 	flag.Parse()
 	fmt.Println(runPow(context.Background()))
 }
@@ -56,7 +58,7 @@ func runPow(ctx context.Context) error {
 	challenge := [32]byte{}
 	rand.Read(challenge[:])
 	//										 115792089237316195423570985008687907853269984665640564039457584007913129639935
-	difficulty, _ := new(big.Int).SetString("222184279848854989393011342979769403266326301844165995655665287168", 10)
+	difficulty, _ := new(big.Int).SetString(difficultyStr, 10)
 	//2221842798488549893930113429797694032668256326301844165995655665287168
 	startNonce, _ := new(big.Int).SetString("38494386881236579867968611199111111111865446613467851139674583965", 10)
 	count := 0
@@ -75,7 +77,7 @@ func runPow(ctx context.Context) error {
 		err = cuCtx.Error()
 		if err != nil {
 			fmt.Println(err)
-			return nil
+			return err
 		}
 
 		count += batch
@@ -98,6 +100,7 @@ func runPow(ctx context.Context) error {
 
 		if hashNumber.ToBig().Cmp(difficulty) == -1 {
 			fmt.Println("********* find nonce ******")
+			fmt.Println("time used ", time.Since(nowT).Milliseconds(), "ms")
 			fmt.Println("gap ", new(big.Int).Sub(resultNonce, startNonce).String())
 			fmt.Println("difficulty ", difficulty.String())
 			fmt.Println("hashResult ", hashNumber.String())
