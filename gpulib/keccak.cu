@@ -268,8 +268,8 @@ extern "C" __global__ __launch_bounds__(1024, 1)
         memcpy(state, challenge, 32);  // Copy challenge into state
         memcpy(state + 4, nonce, 32);  // Copy nonce into state starting from index 4
 
-        uint8_t cuda_pack[64];
-    memcpy(cuda_pack, state, 64);
+     //   uint8_t cuda_pack[64];
+    //memcpy(cuda_pack, state, 64);
 
         state[8] ^= 1;
         state[16] ^= 9223372036854775808ULL; 
@@ -284,9 +284,9 @@ extern "C" __global__ __launch_bounds__(1024, 1)
         }
         
         if (hashbelowtarget((uint64_t*)out, target)) {
-        reverseArray(out, 32);
-        memcpy(hash, out, 32);
-        memcpy(pack, cuda_pack, 64);
+            //reverseArray(out, 32);
+           // memcpy(hash, out, 32);
+           // memcpy(pack, cuda_pack, 64);
             memcpy(resNonce, nonce, 32);
         } 
 

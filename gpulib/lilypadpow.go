@@ -14,7 +14,7 @@ import (
 
 var Debug = true
 
-func Kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, thread, block int, hashPerThread int) (*big.Int, error) {
+func Kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, grid, block int, hashPerThread int) (*big.Int, error) {
 	dIn1, err := cuCtx.MemAllocManaged(32, cu.AttachGlobal)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func Kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 		return nil, err
 	}
 
-	batch := int64(thread * block)
+	batch := int64(grid * block)
 	//(BYTE* indata,	 WORD inlen,	 BYTE* outdata,	 WORD n_batch,	 WORD KECCAK_BLOCK_SIZE)
 	args := []unsafe.Pointer{
 		unsafe.Pointer(&dIn1),
@@ -55,7 +55,7 @@ func Kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 	slices.Reverse(difficutyBytes) //to big
 	cuCtx.MemcpyHtoD(dIn3, unsafe.Pointer(&difficutyBytes[0]), 32)
 
-	cuCtx.LaunchKernel(fn, thread, 1, 1, block, 1, 1, 1, cu.Stream{}, args)
+	cuCtx.LaunchKernel(fn, grid, 1, 1, block, 1, 1, 1, cu.Stream{}, args)
 	cuCtx.Synchronize()
 
 	hOut := make([]byte, 32)
