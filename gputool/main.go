@@ -8,6 +8,8 @@ import (
 	"github/hunjixin/keccak_cu/gpulib"
 	"math/big"
 	"time"
+
+	"gorgonia.org/cu"
 )
 
 var grid int
@@ -23,9 +25,19 @@ func main() {
 }
 
 func runPow(ctx context.Context) error {
+	dev2, _ := cu.GetDevice(0)
+	values, err := dev2.Attributes(cu.MaxRegistersPerBlock, cu.RegistersPerBlock, cu.MaxBlockDimX, cu.MaxBlockDimX, cu.MultiprocessorCount)
+	if err != nil {
+		return err
+	}
+	fmt.Println("MaxRegistersPerBlock", values[0])
+	fmt.Println("RegistersPerBlock", values[1])
+	fmt.Println("MaxBlockDimX", values[2])
+	fmt.Println("MaxBlockDimX", values[3])
+	fmt.Println("MultiprocessorCount", values[4])
+
 	cuCtx, err := gpulib.SetupGPU()
 	if err != nil {
-		fmt.Println("xxx")
 		return err
 	}
 	defer cuCtx.Close()
