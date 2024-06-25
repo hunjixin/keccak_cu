@@ -12,7 +12,7 @@ import (
 	"gorgonia.org/cu"
 )
 
-func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, thread, block int) (*big.Int, error) {
+func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, thread, block int, hashPerThread int) (*big.Int, error) {
 	dIn1, err := cuCtx.MemAllocManaged(32, cu.AttachGlobal)
 	if err != nil {
 		return nil, err
@@ -40,6 +40,7 @@ func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 		unsafe.Pointer(&dIn2),
 		unsafe.Pointer(&dIn3),
 		unsafe.Pointer(&batch),
+		unsafe.Pointer(&hashPerThread),
 		unsafe.Pointer(&dOut),
 	}
 
@@ -66,7 +67,7 @@ func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 	return new(big.Int).SetBytes(hOut), nil
 }
 
-func kernel_lilypad_pow_with_ctx_debug(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, thread, block int) (*big.Int, error) {
+func kernel_lilypad_pow_with_ctx_debug(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, thread, block int, hashPerThread int) (*big.Int, error) {
 	dIn1, err := cuCtx.MemAllocManaged(32, cu.AttachGlobal)
 	if err != nil {
 		return nil, err
@@ -104,6 +105,7 @@ func kernel_lilypad_pow_with_ctx_debug(cuCtx *cu.Ctx, fn cu.Function, challenge 
 		unsafe.Pointer(&dIn2),
 		unsafe.Pointer(&dIn3),
 		unsafe.Pointer(&batch),
+		unsafe.Pointer(&hashPerThread),
 		unsafe.Pointer(&dOut),
 		unsafe.Pointer(&dHash),
 		unsafe.Pointer(&dPack),

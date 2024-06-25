@@ -20,10 +20,12 @@ import (
 
 var grid int
 var block int
+var threadPerThread int
 
 func main() {
 	flag.IntVar(&grid, "grid", 38, "grid size")
 	flag.IntVar(&block, "block", 1024, "block size")
+	flag.IntVar(&threadPerThread, "hash_per_thread", 100, "hash to calculate per threads")
 	flag.Parse()
 	fmt.Println(runPow(context.Background()))
 }
@@ -60,7 +62,7 @@ func runPow(ctx context.Context) error {
 	curNonce := new(big.Int).SetBytes(startNonce.Bytes())
 
 	for {
-		resultNonce, err := kernel_lilypad_pow_with_ctx(cuCtx, fn, challenge, curNonce, difficulty, grid, block) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
+		resultNonce, err := kernel_lilypad_pow_with_ctx(cuCtx, fn, challenge, curNonce, difficulty, grid, block, threadPerThread) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
 		if err != nil {
 			return err
 		}
@@ -70,8 +72,8 @@ func runPow(ctx context.Context) error {
 			return nil
 		}
 
-		count += batch
-		if count%(batch*10) == 0 {
+		count += batch * threadPerThread
+		if count%(batch*threadPerThread*10) == 0 {
 			secs := time.Since(nowT).Seconds()
 			if secs > 0 {
 				fmt.Println("speed MHASH/s", float64(count/1000/1000)/secs)
@@ -102,7 +104,7 @@ func runPow(ctx context.Context) error {
 	}
 }
 
-func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, thread, block int) (*big.Int, error) {
+func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, thread, block int, threadPerThread int) (*big.Int, error) {
 	dIn1, err := cuCtx.MemAllocManaged(32, cu.AttachGlobal)
 	if err != nil {
 		return nil, err
@@ -130,6 +132,7 @@ func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 		unsafe.Pointer(&dIn2),
 		unsafe.Pointer(&dIn3),
 		unsafe.Pointer(&batch),
+		unsafe.Pointer(&threadPerThread),
 		unsafe.Pointer(&dOut),
 	}
 

@@ -45,10 +45,11 @@ func runPow(ctx context.Context) error {
 	nowT := time.Now()
 
 	thread := 38
-	block := 1536
+	block := 1024
 	batch := thread * block
+	threadPerThread := 100
 	for {
-		resultNonce, err := kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, thread, block) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
+		resultNonce, err := kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, thread, block, threadPerThread) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
 		if err != nil {
 			return err
 		}
@@ -58,8 +59,8 @@ func runPow(ctx context.Context) error {
 			return nil
 		}
 
-		count += batch
-		if count%(batch*10) == 0 {
+		count += batch * threadPerThread
+		if count%(count/(1000*1000)) == 0 {
 			secs := time.Since(nowT).Seconds()
 			if secs > 0 {
 				fmt.Println("speed m", float64(count/1000/1000)/secs)

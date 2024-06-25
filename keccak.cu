@@ -211,78 +211,86 @@ __device__ void reverseArray(unsigned char *array, int n) {
 
 
 extern "C" __global__ __launch_bounds__(1024, 1)
-  void kernel_lilypad_pow(uint8_t* challenge, uint64_t* startNonce,  uint64_t* target, uint32_t n_batch, uint8_t* resNonce)
+  void kernel_lilypad_pow(uint8_t* challenge, uint64_t* startNonce,  uint64_t* target, uint32_t n_batch, uint32_t hashPerThread,uint8_t* resNonce)
 {
     uint32_t thread = blockIdx.x * blockDim.x + threadIdx.x; 
     if (thread >= n_batch) {
         return;
     }
 
-       //increase nonce
-    uint8_t* nonce = (uint8_t*)addUint256(startNonce, thread);
-    uint64_t state[KECCAK_STATE_SIZE];
-    memset(state, 0, sizeof(state));
+    for (int i = thread *  hashPerThread ;i< (thread+1)*hashPerThread;i++ ){
+        //increase nonce
+        uint8_t* nonce = (uint8_t*)addUint256(startNonce, thread);
+        uint64_t state[KECCAK_STATE_SIZE];
+        memset(state, 0, sizeof(state));
 
-    memcpy(state, challenge, 32);  // Copy challenge into state
-    memcpy(state + 4, nonce, 32);  // Copy nonce into state starting from index 4
+        memcpy(state, challenge, 32);  // Copy challenge into state
+        memcpy(state + 4, nonce, 32);  // Copy nonce into state starting from index 4
 
-    state[8] ^= 1;
-    state[16] ^= 9223372036854775808ULL; 
+        //uint8_t cuda_pack[64];
+        //memcpy(cuda_pack, state, 64);
 
-    cuda_keccak_permutations(state);
+        state[8] ^= 1;
+        state[16] ^= 9223372036854775808ULL; 
 
-    uint8_t out[32];
-    uint8_t* state_bytes = reinterpret_cast<uint8_t*>(state);
-    #pragma unroll 32
-    for (int i = 0;i<32; i++) {
-        out[i] = state_bytes[31-i];
+        cuda_keccak_permutations(state);
+
+        uint8_t out[32];
+        uint8_t* state_bytes = reinterpret_cast<uint8_t*>(state);
+        #pragma unroll 32
+        for (int i = 0;i<32; i++) {
+            out[i] = state_bytes[31-i];
+        }
+        
+        if (hashbelowtarget((uint64_t*)out, target)) {
+            memcpy(resNonce, nonce, 32);
+        } 
+
+        delete nonce;//45
     }
-    
-    if (hashbelowtarget((uint64_t*)out, target)) {
-        memcpy(resNonce, nonce, 32);
-    } 
-
-    delete nonce;//45
 }
 
 
 extern "C" __global__ __launch_bounds__(1024, 1)
-  void kernel_lilypad_pow_debug(uint8_t* challenge, uint64_t* startNonce,  uint64_t* target, uint32_t n_batch, uint8_t* resNonce,  uint8_t *hash, uint8_t *pack)
+  void kernel_lilypad_pow_debug(uint8_t* challenge, uint64_t* startNonce,  uint64_t* target, uint32_t n_batch,uint32_t hashPerThread, uint8_t* resNonce,  uint8_t *hash, uint8_t *pack)
 {
     uint32_t thread = blockIdx.x * blockDim.x + threadIdx.x; 
     if (thread >= n_batch) {
         return;
     }
 
-       //increase nonce
-    uint8_t* nonce = (uint8_t*)addUint256(startNonce, thread);
-    uint64_t state[KECCAK_STATE_SIZE];
-    memset(state, 0, sizeof(state));
+    for (int i = thread *  hashPerThread ;i< (thread+1)*hashPerThread;i++ ){
+        //increase nonce
+        uint8_t* nonce = (uint8_t*)addUint256(startNonce, thread);
+        uint64_t state[KECCAK_STATE_SIZE];
+        memset(state, 0, sizeof(state));
 
-    memcpy(state, challenge, 32);  // Copy challenge into state
-    memcpy(state + 4, nonce, 32);  // Copy nonce into state starting from index 4
+        memcpy(state, challenge, 32);  // Copy challenge into state
+        memcpy(state + 4, nonce, 32);  // Copy nonce into state starting from index 4
 
-    //uint8_t cuda_pack[64];
-    //memcpy(cuda_pack, state, 64);
+        uint8_t cuda_pack[64];
+    memcpy(cuda_pack, state, 64);
 
-    state[8] ^= 1;
-    state[16] ^= 9223372036854775808ULL; 
+        state[8] ^= 1;
+        state[16] ^= 9223372036854775808ULL; 
 
-    cuda_keccak_permutations(state);
+        cuda_keccak_permutations(state);
 
-    uint8_t out[32];
-    uint8_t* state_bytes = reinterpret_cast<uint8_t*>(state);
-    #pragma unroll 32
-    for (int i = 0;i<32; i++) {
-        out[i] = state_bytes[31-i];
+        uint8_t out[32];
+        uint8_t* state_bytes = reinterpret_cast<uint8_t*>(state);
+        #pragma unroll 32
+        for (int i = 0;i<32; i++) {
+            out[i] = state_bytes[31-i];
+        }
+        
+        if (hashbelowtarget((uint64_t*)out, target)) {
+        reverseArray(out, 32);
+        memcpy(hash, out, 32);
+        memcpy(pack, cuda_pack, 64);
+            memcpy(resNonce, nonce, 32);
+        } 
+
+        delete nonce;//45
     }
     
-    if (hashbelowtarget((uint64_t*)out, target)) {
-       // reverseArray(out, 32);
-       // memcpy(hash, out, 32);
-       // memcpy(pack, cuda_pack, 64);
-        memcpy(resNonce, nonce, 32);
-    } 
-
-    delete nonce;//45
 }
