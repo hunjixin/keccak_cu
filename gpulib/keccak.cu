@@ -210,7 +210,7 @@ __device__ void reverseArray(unsigned char *array, int n) {
 }
 
 
-extern "C" __global__ __launch_bounds__(1024, 1)
+extern "C" __global__ 
   void kernel_lilypad_pow( 
     const uint8_t*  __restrict__  challenge, 
     const uint64_t* __restrict__  startNonce, 
@@ -257,7 +257,7 @@ extern "C" __global__ __launch_bounds__(1024, 1)
 }
 
 
-extern "C" __global__ __launch_bounds__(1024, 1)
+extern "C" __global__ 
   void kernel_lilypad_pow_debug(
     const uint8_t*  __restrict__  challenge, 
     const uint64_t* __restrict__  startNonce, 

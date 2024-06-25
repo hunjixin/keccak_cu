@@ -56,6 +56,9 @@ func Kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 	cuCtx.MemcpyHtoD(dIn3, unsafe.Pointer(&difficutyBytes[0]), 32)
 
 	cuCtx.LaunchKernel(fn, grid, 1, 1, block, 1, 1, 1, cu.Stream{}, args)
+	if err = cuCtx.Error(); err != nil {
+		return nil, fmt.Errorf("launch kernel fail maybe decrease threads help %w", err)
+	}
 	cuCtx.Synchronize()
 
 	hOut := make([]byte, 32)
