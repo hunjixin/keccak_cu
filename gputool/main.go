@@ -17,10 +17,11 @@ var threadPerThread int
 func main() {
 	flag.IntVar(&grid, "grid", 38, "grid size")
 	flag.IntVar(&block, "block", 1024, "block size")
-	flag.IntVar(&threadPerThread, "hash_per_thread", 100, "hash to calculate per threads")
+	flag.IntVar(&threadPerThread, "hash_per_thread", 1, "hash to calculate per threads")
 	flag.Parse()
 	fmt.Println(runPow(context.Background()))
 }
+
 func runPow(ctx context.Context) error {
 	cuCtx, err := gpulib.SetupGPU()
 	if err != nil {
@@ -67,7 +68,7 @@ func runPow(ctx context.Context) error {
 		}
 
 		count += batch
-		if count%(batch*10) == 0 {
+		if count%(batch*4) == 0 {
 			secs := time.Since(nowT).Seconds()
 			if secs > 0 {
 				fmt.Println("speed MHASH/s", float64(count/1000/1000)/secs)

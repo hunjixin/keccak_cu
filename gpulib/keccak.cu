@@ -218,7 +218,7 @@ extern "C" __global__ __launch_bounds__(1024, 1)
         return;
     }
 
-    for (int i = thread *  hashPerThread ;i< (thread+1)*hashPerThread;i++ ){
+    for (uint32_t i = thread *  hashPerThread ;i< (thread+1)*hashPerThread;i++ ){
         //increase nonce
         uint8_t* nonce = (uint8_t*)addUint256(startNonce, i);
         uint64_t state[KECCAK_STATE_SIZE];
