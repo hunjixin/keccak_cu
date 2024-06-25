@@ -220,7 +220,7 @@ extern "C" __global__ __launch_bounds__(1024, 1)
 
     for (int i = thread *  hashPerThread ;i< (thread+1)*hashPerThread;i++ ){
         //increase nonce
-        uint8_t* nonce = (uint8_t*)addUint256(startNonce, thread);
+        uint8_t* nonce = (uint8_t*)addUint256(startNonce, i);
         uint64_t state[KECCAK_STATE_SIZE];
         memset(state, 0, sizeof(state));
 
@@ -261,7 +261,7 @@ extern "C" __global__ __launch_bounds__(1024, 1)
 
     for (int i = thread *  hashPerThread ;i< (thread+1)*hashPerThread;i++ ){
         //increase nonce
-        uint8_t* nonce = (uint8_t*)addUint256(startNonce, thread);
+        uint8_t* nonce = (uint8_t*)addUint256(startNonce, i);
         uint64_t state[KECCAK_STATE_SIZE];
         memset(state, 0, sizeof(state));
 
