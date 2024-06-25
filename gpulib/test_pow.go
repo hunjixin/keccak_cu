@@ -38,7 +38,7 @@ func RunPow(ctx context.Context) error {
 	challenge := [32]byte{}
 	rand.Read(challenge[:])
 	//										 115792089237316195423570985008687907853269984665640564039457584007913129639935
-	difficulty, _ := new(big.Int).SetString("22218427984885498911111111111393011342979769403265632995655665287168", 10)
+	difficulty, _ := new(big.Int).SetString("11579208923731619542357098500868790785326998466564056403945758400791312", 10)
 	//2221842798488549893930113429797694032668256326301844165995655665287168
 	startNonce, _ := new(big.Int).SetString("38494386881236579867968611199111111111865446613467851139674583965", 10)
 	count := 0
@@ -47,7 +47,7 @@ func RunPow(ctx context.Context) error {
 	thread := 38
 	block := 1024
 	batch := thread * block
-	threadPerThread := 1
+	threadPerThread := 100
 	for {
 		resultNonce, err := Kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, thread, block, threadPerThread) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
 		if err != nil {

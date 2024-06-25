@@ -9,6 +9,6 @@ import (
 )
 
 func main() {
-
+	gpulib.Debug = true
 	fmt.Println(gpulib.RunPow(context.Background()))
 }

@@ -211,7 +211,13 @@ __device__ void reverseArray(unsigned char *array, int n) {
 
 
 extern "C" __global__ __launch_bounds__(1024, 1)
-  void kernel_lilypad_pow(uint8_t* challenge, uint64_t* startNonce,  uint64_t* target, uint32_t n_batch, uint32_t hashPerThread,uint8_t* resNonce)
+  void kernel_lilypad_pow( 
+    const uint8_t*  __restrict__  challenge, 
+    const uint64_t* __restrict__  startNonce, 
+    const uint64_t* __restrict__  target, 
+    const uint32_t n_batch,
+    const uint32_t hashPerThread, 
+    uint8_t* resNonce)
 {
     uint32_t thread = blockIdx.x * blockDim.x + threadIdx.x; 
     if (thread >= n_batch) {
@@ -252,7 +258,12 @@ extern "C" __global__ __launch_bounds__(1024, 1)
 
 
 extern "C" __global__ __launch_bounds__(1024, 1)
-  void kernel_lilypad_pow_debug(uint8_t* challenge, uint64_t* startNonce,  uint64_t* target, uint32_t n_batch,uint32_t hashPerThread, uint8_t* resNonce,  uint8_t *hash, uint8_t *pack)
+  void kernel_lilypad_pow_debug(
+    const uint8_t*  __restrict__  challenge, 
+    const uint64_t* __restrict__  startNonce, 
+    const uint64_t* __restrict__  target, 
+    const uint32_t n_batch,
+    const uint32_t hashPerThread, uint8_t* resNonce,  uint8_t *hash, uint8_t *pack)
 {
     uint32_t thread = blockIdx.x * blockDim.x + threadIdx.x; 
     if (thread >= n_batch) {
@@ -268,8 +279,8 @@ extern "C" __global__ __launch_bounds__(1024, 1)
         memcpy(state, challenge, 32);  // Copy challenge into state
         memcpy(state + 4, nonce, 32);  // Copy nonce into state starting from index 4
 
-     //   uint8_t cuda_pack[64];
-    //memcpy(cuda_pack, state, 64);
+       uint8_t cuda_pack[64];
+    memcpy(cuda_pack, state, 64);
 
         state[8] ^= 1;
         state[16] ^= 9223372036854775808ULL; 
@@ -284,9 +295,9 @@ extern "C" __global__ __launch_bounds__(1024, 1)
         }
         
         if (hashbelowtarget((uint64_t*)out, target)) {
-            //reverseArray(out, 32);
-           // memcpy(hash, out, 32);
-           // memcpy(pack, cuda_pack, 64);
+            reverseArray(out, 32);
+            memcpy(hash, out, 32);
+            memcpy(pack, cuda_pack, 64);
             memcpy(resNonce, nonce, 32);
         } 
 
