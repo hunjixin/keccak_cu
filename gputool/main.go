@@ -59,7 +59,7 @@ func runPow(ctx context.Context) error {
 	count := 0
 	nowT := time.Now()
 
-	batch := grid * block
+	batch := grid * block * threadPerThread
 
 	curNonce := new(big.Int).SetBytes(startNonce.Bytes())
 
@@ -74,8 +74,8 @@ func runPow(ctx context.Context) error {
 			return nil
 		}
 
-		count += batch * threadPerThread
-		if count%(batch*threadPerThread*10) == 0 {
+		count += batch
+		if count%(batch*10) == 0 {
 			secs := time.Since(nowT).Seconds()
 			if secs > 0 {
 				fmt.Println("speed MHASH/s", float64(count/1000/1000)/secs)
