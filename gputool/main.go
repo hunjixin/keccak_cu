@@ -41,8 +41,6 @@ func runPow(ctx context.Context) error {
 		return err
 	}
 
-	fmt.Println("use arg", grid, block, threadPerThread)
-
 	challenge := [32]byte{}
 	rand.Read(challenge[:])
 	//										 115792089237316195423570985008687907853269984665640564039457584007913129639935
@@ -53,7 +51,8 @@ func runPow(ctx context.Context) error {
 	nowT := time.Now()
 
 	batch := grid * block * threadPerThread
-
+	fmt.Println("use arg", grid, block, threadPerThread)
+	fmt.Println(batch, " hash per kernel")
 	curNonce := new(big.Int).SetBytes(startNonce.Bytes())
 
 	for {
