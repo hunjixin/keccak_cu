@@ -22,9 +22,9 @@
 ;
 .const .align 8 .b8 CUDA_KECCAK_CONSTS[192] = {1, 0, 0, 0, 0, 0, 0, 0, 130, 128, 0, 0, 0, 0, 0, 0, 138, 128, 0, 0, 0, 0, 0, 128, 0, 128, 0, 128, 0, 0, 0, 128, 139, 128, 0, 0, 0, 0, 0, 0, 1, 0, 0, 128, 0, 0, 0, 0, 129, 128, 0, 128, 0, 0, 0, 128, 9, 128, 0, 0, 0, 0, 0, 128, 138, 0, 0, 0, 0, 0, 0, 0, 136, 0, 0, 0, 0, 0, 0, 0, 9, 128, 0, 128, 0, 0, 0, 0, 10, 0, 0, 128, 0, 0, 0, 0, 139, 128, 0, 128, 0, 0, 0, 0, 139, 0, 0, 0, 0, 0, 0, 128, 137, 128, 0, 0, 0, 0, 0, 128, 3, 128, 0, 0, 0, 0, 0, 128, 2, 128, 0, 0, 0, 0, 0, 128, 128, 0, 0, 0, 0, 0, 0, 128, 10, 128, 0, 0, 0, 0, 0, 0, 10, 0, 0, 128, 0, 0, 0, 128, 129, 128, 0, 128, 0, 0, 0, 128, 128, 128, 0, 0, 0, 0, 0, 128, 1, 0, 0, 128, 0, 0, 0, 0, 8, 128, 0, 128, 0, 0, 0, 128};
 
-.func  (.param .b32 func_retval0) _ZN39_INTERNAL_467e079b_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1_(
-	.param .b64 _ZN39_INTERNAL_467e079b_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1__param_0,
-	.param .b64 _ZN39_INTERNAL_467e079b_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1__param_1
+.func  (.param .b32 func_retval0) _ZN39_INTERNAL_9445990f_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1_(
+	.param .b64 _ZN39_INTERNAL_9445990f_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1__param_0,
+	.param .b64 _ZN39_INTERNAL_9445990f_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1__param_1
 )
 {
 	.reg .pred 	%p<8>;
@@ -33,8 +33,8 @@
 	.reg .b64 	%rd<13>;
 
 
-	ld.param.u64 	%rd9, [_ZN39_INTERNAL_467e079b_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1__param_0];
-	ld.param.u64 	%rd10, [_ZN39_INTERNAL_467e079b_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1__param_1];
+	ld.param.u64 	%rd9, [_ZN39_INTERNAL_9445990f_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1__param_0];
+	ld.param.u64 	%rd10, [_ZN39_INTERNAL_9445990f_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1__param_1];
 	cvta.to.global.u64 	%rd2, %rd10;
 	cvta.to.local.u64 	%rd1, %rd9;
 	ld.global.u64 	%rd3, [%rd2+24];
@@ -888,7 +888,7 @@ $L__BB1_4:
 	st.param.b64 	[param1+0], %rd68;
 	.param .b32 retval0;
 	call.uni (retval0), 
-	_ZN39_INTERNAL_467e079b_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1_, 
+	_ZN39_INTERNAL_9445990f_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1_, 
 	(
 	param0, 
 	param1
@@ -1815,7 +1815,7 @@ $L__BB2_4:
 	st.param.b64 	[param1+0], %rd401;
 	.param .b32 retval0;
 	call.uni (retval0), 
-	_ZN39_INTERNAL_467e079b_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1_, 
+	_ZN39_INTERNAL_9445990f_9_keccak_cu_bbb2fa6e15hashbelowtargetEPKyS1_, 
 	(
 	param0, 
 	param1

@@ -1,4 +1,4 @@
-package main
+package gpulib
 
 import (
 	"context"
@@ -13,11 +13,11 @@ import (
 	"gorgonia.org/cu"
 )
 
-func runPow(ctx context.Context) error {
+func RunPow(ctx context.Context) error {
 	dev2, _ := cu.GetDevice(0)
 	fmt.Println(dev2.Attributes(cu.MaxBlockDimX, cu.MaxBlockDimX))
 
-	cuCtx, err := setupGPU()
+	cuCtx, err := SetupGPU()
 	if err != nil {
 		fmt.Println("xxx")
 		return err
@@ -49,7 +49,7 @@ func runPow(ctx context.Context) error {
 	batch := thread * block
 	threadPerThread := 100
 	for {
-		resultNonce, err := kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, thread, block, threadPerThread) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
+		resultNonce, err := Kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, thread, block, threadPerThread) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
 		if err != nil {
 			return err
 		}
@@ -74,7 +74,7 @@ func runPow(ctx context.Context) error {
 		}
 
 		//verify
-		hashNumber, err := calculateHashNumber(challenge, resultNonce)
+		hashNumber, err := CalculateHashNumber(challenge, resultNonce)
 		if err != nil {
 			panic(err)
 		}
@@ -95,21 +95,20 @@ func runPow(ctx context.Context) error {
 	return nil
 }
 
-func calculateHashNumber(challenge [32]byte, nonce *big.Int) (*uint256.Int, error) {
-	data, err := formatMinerArgs(challenge, nonce)
+func CalculateHashNumber(challenge [32]byte, nonce *big.Int) (*uint256.Int, error) {
+	data, err := FormatMinerArgs(challenge, nonce)
 	if err != nil {
 		return nil, err
 	}
 
-	if debug {
-
+	if Debug {
 		fmt.Println("cpu pack result:", hex.EncodeToString(data))
 	}
 
 	// Calculate Keccak-256 hash
 	hashResult := crypto.Keccak256(data)
 
-	if debug {
+	if Debug {
 
 		fmt.Println("cpu hash result:", hex.EncodeToString(hashResult))
 	}

@@ -1,4 +1,4 @@
-package main
+package gpulib
 
 import (
 	"encoding/hex"
@@ -12,7 +12,9 @@ import (
 	"gorgonia.org/cu"
 )
 
-func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, thread, block int, hashPerThread int) (*big.Int, error) {
+var Debug = true
+
+func Kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, thread, block int, hashPerThread int) (*big.Int, error) {
 	dIn1, err := cuCtx.MemAllocManaged(32, cu.AttachGlobal)
 	if err != nil {
 		return nil, err
@@ -67,7 +69,7 @@ func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 	return new(big.Int).SetBytes(hOut), nil
 }
 
-func kernel_lilypad_pow_with_ctx_debug(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, thread, block int, hashPerThread int) (*big.Int, error) {
+func Kernel_lilypad_pow_with_ctx_debug(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, thread, block int, hashPerThread int) (*big.Int, error) {
 	dIn1, err := cuCtx.MemAllocManaged(32, cu.AttachGlobal)
 	if err != nil {
 		return nil, err
@@ -131,14 +133,14 @@ func kernel_lilypad_pow_with_ctx_debug(cuCtx *cu.Ctx, fn cu.Function, challenge 
 
 	hHash := make([]byte, 32)
 	cuCtx.MemcpyDtoH(unsafe.Pointer(&hHash[0]), dHash, 32)
-	if debug {
+	if Debug {
 		fmt.Println("cuda hash result:", hex.EncodeToString(hHash))
 	}
 
 	hPack := make([]byte, 64)
 	cuCtx.MemcpyDtoH(unsafe.Pointer(&hPack[0]), dPack, 64)
 
-	if debug {
+	if Debug {
 		fmt.Println("cuda pack result: ", hex.EncodeToString(hPack))
 	}
 	cuCtx.MemFree(dIn1)
@@ -151,7 +153,7 @@ func kernel_lilypad_pow_with_ctx_debug(cuCtx *cu.Ctx, fn cu.Function, challenge 
 	return new(big.Int).SetBytes(hOut), nil
 }
 
-func setupGPU() (*cu.Ctx, error) {
+func SetupGPU() (*cu.Ctx, error) {
 	devices, _ := cu.NumDevices()
 
 	if devices == 0 {

@@ -5,17 +5,9 @@ import (
 	"crypto/rand"
 	"flag"
 	"fmt"
+	"github/hunjixin/keccak_cu/gpulib"
 	"math/big"
-	"slices"
 	"time"
-	"unsafe"
-
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/holiman/uint256"
-	"github.com/pkg/errors"
-	"gorgonia.org/cu"
 )
 
 var grid int
@@ -30,7 +22,7 @@ func main() {
 	fmt.Println(runPow(context.Background()))
 }
 func runPow(ctx context.Context) error {
-	cuCtx, err := setupGPU()
+	cuCtx, err := gpulib.SetupGPU()
 	if err != nil {
 		fmt.Println("xxx")
 		return err
@@ -64,7 +56,7 @@ func runPow(ctx context.Context) error {
 	curNonce := new(big.Int).SetBytes(startNonce.Bytes())
 
 	for {
-		resultNonce, err := kernel_lilypad_pow_with_ctx(cuCtx, fn, challenge, curNonce, difficulty, grid, block, threadPerThread) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
+		resultNonce, err := gpulib.Kernel_lilypad_pow_with_ctx(cuCtx, fn, challenge, curNonce, difficulty, grid, block, threadPerThread) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
 		if err != nil {
 			return err
 		}
@@ -87,7 +79,7 @@ func runPow(ctx context.Context) error {
 		}
 
 		//verify
-		hashNumber, err := calculateHashNumber(challenge, resultNonce)
+		hashNumber, err := gpulib.CalculateHashNumber(challenge, resultNonce)
 		if err != nil {
 			panic(err)
 		}
@@ -104,110 +96,4 @@ func runPow(ctx context.Context) error {
 		}
 
 	}
-}
-
-func kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]byte, startNonce *big.Int, difficulty *big.Int, thread, block int, threadPerThread int) (*big.Int, error) {
-	dIn1, err := cuCtx.MemAllocManaged(32, cu.AttachGlobal)
-	if err != nil {
-		return nil, err
-	}
-
-	dIn2, err := cuCtx.MemAllocManaged(32, cu.AttachGlobal)
-	if err != nil {
-		return nil, err
-	}
-
-	dIn3, err := cuCtx.MemAllocManaged(32, cu.AttachGlobal)
-	if err != nil {
-		return nil, err
-	}
-
-	dOut, err := cuCtx.MemAllocManaged(32, cu.AttachGlobal)
-	if err != nil {
-		return nil, err
-	}
-
-	batch := int64(thread * block)
-	//(BYTE* indata,	 WORD inlen,	 BYTE* outdata,	 WORD n_batch,	 WORD KECCAK_BLOCK_SIZE)
-	args := []unsafe.Pointer{
-		unsafe.Pointer(&dIn1),
-		unsafe.Pointer(&dIn2),
-		unsafe.Pointer(&dIn3),
-		unsafe.Pointer(&batch),
-		unsafe.Pointer(&threadPerThread),
-		unsafe.Pointer(&dOut),
-	}
-
-	cuCtx.MemcpyHtoD(dIn1, unsafe.Pointer(&challenge[0]), 32)
-
-	startNonceBytes := math.U256Bytes(startNonce)
-	cuCtx.MemcpyHtoD(dIn2, unsafe.Pointer(&startNonceBytes[0]), 32)
-
-	difficutyBytes := math.U256Bytes(difficulty)
-	slices.Reverse(difficutyBytes) //to big
-	cuCtx.MemcpyHtoD(dIn3, unsafe.Pointer(&difficutyBytes[0]), 32)
-
-	cuCtx.LaunchKernel(fn, thread, 1, 1, block, 1, 1, 1, cu.Stream{}, args)
-	cuCtx.Synchronize()
-
-	hOut := make([]byte, 32)
-	cuCtx.MemcpyDtoH(unsafe.Pointer(&hOut[0]), dOut, 32)
-
-	cuCtx.MemFree(dIn1)
-	cuCtx.MemFree(dIn2)
-	cuCtx.MemFree(dIn3)
-	cuCtx.MemFree(dOut)
-
-	return new(big.Int).SetBytes(hOut), nil
-}
-
-func setupGPU() (*cu.Ctx, error) {
-	devices, _ := cu.NumDevices()
-
-	if devices == 0 {
-		return nil, errors.Errorf("NoDevice")
-	}
-
-	dev := cu.Device(0)
-
-	return cu.NewContext(dev, cu.SchedAuto), nil
-}
-
-func calculateHashNumber(challenge [32]byte, nonce *big.Int) (*uint256.Int, error) {
-	data, err := formatMinerArgs(challenge, nonce)
-	if err != nil {
-		return nil, err
-	}
-
-	// Calculate Keccak-256 hash
-	hashResult := crypto.Keccak256(data)
-
-	fmt.Println("hashnumber ", new(uint256.Int).SetBytes(hashResult).String())
-	return new(uint256.Int).SetBytes(hashResult), nil
-}
-
-func formatMinerArgs(challenge [32]byte, nonce *big.Int) ([]byte, error) {
-	//todo use nonce in replace instead of building from scratch for better performance
-	// keccak256(abi.encodePacked(lastChallenge, msg.sender, nodeId));
-	bytes32Ty, _ := abi.NewType("bytes32", "", nil)
-	uint256Ty, _ := abi.NewType("uint256", "", nil)
-
-	arguments := abi.Arguments{
-		{
-			Type: bytes32Ty,
-		},
-		{
-			Type: uint256Ty,
-		},
-	}
-
-	bytes, err := arguments.Pack(
-		challenge,
-		nonce,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return bytes, nil
 }
