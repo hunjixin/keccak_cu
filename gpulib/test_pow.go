@@ -44,12 +44,12 @@ func RunPow(ctx context.Context) error {
 	count := 0
 	nowT := time.Now()
 
-	thread := 1
-	block := 32
-	batch := thread * block
+	grid := 38
+	block := 1024
+	batch := grid * block
 	threadPerThread := 1
 	for {
-		resultNonce, err := Kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, thread, block, threadPerThread) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
+		resultNonce, err := Kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, grid, block, threadPerThread) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
 		if err != nil {
 			return err
 		}
@@ -68,7 +68,6 @@ func RunPow(ctx context.Context) error {
 		}
 		startNonce = new(big.Int).Add(startNonce, big.NewInt(int64(batch)))
 		if resultNonce.BitLen() == 0 {
-			fmt.Println("not found ", startNonce.String())
 			continue
 			//return nil
 		}

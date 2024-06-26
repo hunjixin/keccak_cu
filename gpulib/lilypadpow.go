@@ -130,18 +130,30 @@ func Kernel_lilypad_pow_with_ctx_debug(cuCtx *cu.Ctx, fn cu.Function, challenge 
 		return nil, fmt.Errorf("launch kernel fail maybe decrease threads help %w", err)
 	}
 	cuCtx.Synchronize()
+	if err = cuCtx.Error(); err != nil {
+		return nil, fmt.Errorf("launch kernel fail maybe decrease threads help %w", err)
+	}
 
 	hOut := make([]byte, 32)
 	cuCtx.MemcpyDtoH(unsafe.Pointer(&hOut[0]), dOut, 32)
+	if err = cuCtx.Error(); err != nil {
+		return nil, fmt.Errorf("launch kernel fail maybe decrease threads help %w", err)
+	}
 
 	hHash := make([]byte, 32)
 	cuCtx.MemcpyDtoH(unsafe.Pointer(&hHash[0]), dHash, 32)
 	if Debug {
 		fmt.Println("cuda hash result:", hex.EncodeToString(hHash))
 	}
+	if err = cuCtx.Error(); err != nil {
+		return nil, fmt.Errorf("launch kernel fail maybe decrease threads help %w", err)
+	}
 
 	hPack := make([]byte, 64)
 	cuCtx.MemcpyDtoH(unsafe.Pointer(&hPack[0]), dPack, 64)
+	if err = cuCtx.Error(); err != nil {
+		return nil, fmt.Errorf("launch kernel fail maybe decrease threads help %w", err)
+	}
 
 	if Debug {
 		fmt.Println("cuda pack result: ", hex.EncodeToString(hPack))

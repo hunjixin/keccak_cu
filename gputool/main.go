@@ -84,7 +84,7 @@ func runPow(ctx context.Context) error {
 		if count%(batch*4) == 0 {
 			secs := time.Since(nowT).Seconds()
 			if secs > 0 {
-				fmt.Println("speed MHASH/s", float64(count/1000/1000)/secs)
+				fmt.Println("speed MHASH/s", float64(count/1000/1000/32)/secs)
 			}
 		}
 		curNonce = new(big.Int).Add(curNonce, big.NewInt(int64(batch)))

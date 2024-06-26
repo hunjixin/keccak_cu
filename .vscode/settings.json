@@ -9,6 +9,7 @@
         "xhash": "cpp",
         "functional": "cpp",
         "cmath": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "array": "cpp"
     }
 }
