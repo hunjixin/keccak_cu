@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
-	"slices"
 	"unsafe"
 
 	"github.com/ethereum/go-ethereum/common/math"
@@ -52,7 +51,6 @@ func Kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 	cuCtx.MemcpyHtoD(dIn2, unsafe.Pointer(&startNonceBytes[0]), 32)
 
 	difficutyBytes := math.U256Bytes(difficulty)
-	slices.Reverse(difficutyBytes) //to big
 	cuCtx.MemcpyHtoD(dIn3, unsafe.Pointer(&difficutyBytes[0]), 32)
 
 	cuCtx.LaunchKernel(fn, grid, 1, 1, block, 1, 1, 1, cu.Stream{}, args)
@@ -122,7 +120,6 @@ func Kernel_lilypad_pow_with_ctx_debug(cuCtx *cu.Ctx, fn cu.Function, challenge 
 	cuCtx.MemcpyHtoD(dIn2, unsafe.Pointer(&startNonceBytes[0]), 32)
 
 	difficutyBytes := math.U256Bytes(difficulty)
-	slices.Reverse(difficutyBytes) //to big
 	cuCtx.MemcpyHtoD(dIn3, unsafe.Pointer(&difficutyBytes[0]), 32)
 
 	cuCtx.LaunchKernel(fn, thread, 1, 1, block, 1, 1, 1, cu.Stream{}, args)

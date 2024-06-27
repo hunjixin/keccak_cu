@@ -6,41 +6,40 @@
  *
  * This file is released into the Public Domain.
  */
- 
- 
+
 extern "C"
 {
-    #include "keccak.cuh"
+#include "keccak.cuh"
 }
 
 #define KECCAK_ROUND 24
 #define KECCAK_STATE_SIZE 25
 #define KECCAK_Q_SIZE 192
 
-__constant__ uint64_t CUDA_KECCAK_CONSTS[24] = { 0x0000000000000001, 0x0000000000008082,
-                                          0x800000000000808a, 0x8000000080008000, 0x000000000000808b, 0x0000000080000001, 0x8000000080008081,
-                                          0x8000000000008009, 0x000000000000008a, 0x0000000000000088, 0x0000000080008009, 0x000000008000000a,
-                                          0x000000008000808b, 0x800000000000008b, 0x8000000000008089, 0x8000000000008003, 0x8000000000008002,
-                                          0x8000000000000080, 0x000000000000800a, 0x800000008000000a, 0x8000000080008081, 0x8000000000008080,
-                                          0x0000000080000001, 0x8000000080008008 };
+__constant__ uint64_t CUDA_KECCAK_CONSTS[24] = {0x0000000000000001, 0x0000000000008082,
+                                                0x800000000000808a, 0x8000000080008000, 0x000000000000808b, 0x0000000080000001, 0x8000000080008081,
+                                                0x8000000000008009, 0x000000000000008a, 0x0000000000000088, 0x0000000080008009, 0x000000008000000a,
+                                                0x000000008000808b, 0x800000000000008b, 0x8000000000008089, 0x8000000000008003, 0x8000000000008002,
+                                                0x8000000000000080, 0x000000000000800a, 0x800000008000000a, 0x8000000080008081, 0x8000000000008080,
+                                                0x0000000080000001, 0x8000000080008008};
 
-__device__ __forceinline__ uint64_t asm_cuda_keccak_ROTL64(const uint64_t x, const int offset) {
-	uint64_t res;
-	asm("{ // ROTL64 \n\t"
-		".reg .u32 tl,th,vl,vh;\n\t"
-		".reg .pred p;\n\t"
-		"mov.b64 {tl,th}, %1;\n\t"
-		"shf.l.wrap.b32 vl, tl, th, %2;\n\t"
-		"shf.l.wrap.b32 vh, th, tl, %2;\n\t"
-		"setp.lt.u32 p, %2, 32;\n\t"
-		"@!p mov.b64 %0, {vl,vh};\n\t"
-		"@p  mov.b64 %0, {vh,vl};\n\t"
-	"}\n" : "=l"(res) : "l"(x) , "r"(offset)
-	);
-	return res;
+__device__ __forceinline__ uint64_t asm_cuda_keccak_ROTL64(const uint64_t x, const int offset)
+{
+    uint64_t res;
+    asm("{ // ROTL64 \n\t"
+        ".reg .u32 tl,th,vl,vh;\n\t"
+        ".reg .pred p;\n\t"
+        "mov.b64 {tl,th}, %1;\n\t"
+        "shf.l.wrap.b32 vl, tl, th, %2;\n\t"
+        "shf.l.wrap.b32 vh, th, tl, %2;\n\t"
+        "setp.lt.u32 p, %2, 32;\n\t"
+        "@!p mov.b64 %0, {vl,vh};\n\t"
+        "@p  mov.b64 %0, {vh,vl};\n\t"
+        "}\n" : "=l"(res) : "l"(x), "r"(offset));
+    return res;
 }
 
-__device__ __forceinline__ static void cuda_keccak_permutations(uint64_t* A)
+__device__ __forceinline__ static void cuda_keccak_permutations(uint64_t *A)
 {
     uint64_t *a00 = A, *a01 = A + 1, *a02 = A + 2, *a03 = A + 3, *a04 = A + 4;
     uint64_t *a05 = A + 5, *a06 = A + 6, *a07 = A + 7, *a08 = A + 8, *a09 = A + 9;
@@ -48,15 +47,16 @@ __device__ __forceinline__ static void cuda_keccak_permutations(uint64_t* A)
     uint64_t *a15 = A + 15, *a16 = A + 16, *a17 = A + 17, *a18 = A + 18, *a19 = A + 19;
     uint64_t *a20 = A + 20, *a21 = A + 21, *a22 = A + 22, *a23 = A + 23, *a24 = A + 24;
 
-    for (int i = 0; i < KECCAK_ROUND; i++) {
+    for (int i = 0; i < KECCAK_ROUND; i++)
+    {
 
         /* Theta */
-		uint64_t c0 = *a00^ *a05^ *a10^ *a15^ *a20;
-		uint64_t c1 = *a01^ *a06^ *a11^ *a16^ *a21;
-		uint64_t c2 = *a02^ *a07^ *a12^ *a17^ *a22;
-		uint64_t c3 = *a03^ *a08^ *a13^ *a18^ *a23;
-		uint64_t c4 =*a04^ *a09^ *a14^ *a19^ *a24;
-		
+        uint64_t c0 = *a00 ^ *a05 ^ *a10 ^ *a15 ^ *a20;
+        uint64_t c1 = *a01 ^ *a06 ^ *a11 ^ *a16 ^ *a21;
+        uint64_t c2 = *a02 ^ *a07 ^ *a12 ^ *a17 ^ *a22;
+        uint64_t c3 = *a03 ^ *a08 ^ *a13 ^ *a18 ^ *a23;
+        uint64_t c4 = *a04 ^ *a09 ^ *a14 ^ *a19 ^ *a24;
+
         int64_t d1 = asm_cuda_keccak_ROTL64(c1, 1) ^ c4;
         int64_t d2 = asm_cuda_keccak_ROTL64(c2, 1) ^ c0;
         int64_t d3 = asm_cuda_keccak_ROTL64(c3, 1) ^ c1;
@@ -89,7 +89,6 @@ __device__ __forceinline__ static void cuda_keccak_permutations(uint64_t* A)
         *a19 ^= d0;
         *a24 ^= d0;
 
-
         /* Rho pi */
         c1 = asm_cuda_keccak_ROTL64(*a01, 1);
         *a01 = asm_cuda_keccak_ROTL64(*a06, 44);
@@ -117,8 +116,8 @@ __device__ __forceinline__ static void cuda_keccak_permutations(uint64_t* A)
         *a07 = asm_cuda_keccak_ROTL64(*a10, 3);
         *a10 = c1;
 
-        /* Chi * a ^ (~b) & c*/  
-        c0 = *a00 ^ (~*a01 & *a02);  // use int2 vector this can be opt to 2 lop.b32 instruction
+        /* Chi * a ^ (~b) & c*/
+        c0 = *a00 ^ (~*a01 & *a02); // use int2 vector this can be opt to 2 lop.b32 instruction
         c1 = *a01 ^ (~*a02 & *a03);
         *a02 ^= ~*a03 & *a04;
         *a03 ^= ~*a04 & *a00;
@@ -163,25 +162,20 @@ __device__ __forceinline__ static void cuda_keccak_permutations(uint64_t* A)
     }
 }
 
-__noinline__ __device__ static bool hashbelowtarget(const uint64_t *const __restrict__ hash, const uint64_t *const __restrict__ target)
+__noinline__ __device__ static bool hashbelowtarget(const uint8_t *const __restrict__ hash, const uint8_t *const __restrict__ target)
 {
-    if (hash[3] > target[3])
-        return false;
-    if (hash[3] < target[3])
-        return true;
-    if (hash[2] > target[2])
-        return false;
-    if (hash[2] < target[2])
-        return true;
-
-    if (hash[1] > target[1])
-        return false;
-    if (hash[1] < target[1])
-        return true;
-    if (hash[0] > target[0])
-        return false;
-
-    return true;
+    for (int i = 0; i < 32; i++)
+    {
+        if (hash[i] < target[i])
+        {
+            return true;
+        }
+        else if (hash[i] > target[i])
+        {
+            return false;
+        }
+    }
+    return false;
 }
 
 __device__ uint64_t *addUint256(const uint64_t *a, const uint64_t b)
@@ -201,8 +195,10 @@ __device__ uint64_t *addUint256(const uint64_t *a, const uint64_t b)
     return result;
 }
 
-__device__ void reverseArray(unsigned char *array, int n) {
-    for (int i = 0; i < n / 2; ++i) {
+__device__ void reverseArray(unsigned char *array, int n)
+{
+    for (int i = 0; i < n / 2; ++i)
+    {
         unsigned char temp = array[i];
         array[i] = array[n - 1 - i];
         array[n - 1 - i] = temp;
@@ -210,98 +206,83 @@ __device__ void reverseArray(unsigned char *array, int n) {
 }
 
 
-extern "C" __global__ 
-  void kernel_lilypad_pow( 
-    const uint8_t*  __restrict__  challenge, 
-    const uint64_t* __restrict__  startNonce, 
-    const uint64_t* __restrict__  target, 
+extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow(
+    const uint8_t *__restrict__ challenge,
+    const uint64_t *__restrict__ startNonce,
+    const uint8_t *__restrict__ target,
     const uint32_t n_batch,
-    const uint32_t hashPerThread, 
-    uint8_t* resNonce)
+    const uint32_t hashPerThread, uint8_t *resNonce)
 {
-    uint32_t thread = blockIdx.x * blockDim.x + threadIdx.x; 
-    if (thread >= n_batch) {
+    uint32_t thread = blockIdx.x * blockDim.x + threadIdx.x;
+    if (thread >= n_batch)
+    {
         return;
     }
 
-    for (uint32_t i = thread *  hashPerThread ;i< (thread+1)*hashPerThread;i++ ){
-        //increase nonce
-        uint8_t* nonce = (uint8_t*)addUint256(startNonce, i);
+    for (int i = thread * hashPerThread; i < (thread + 1) * hashPerThread; i++)
+    {
+        // increase nonce
+        uint8_t *nonce = (uint8_t *)addUint256(startNonce, i);
         uint64_t state[KECCAK_STATE_SIZE];
         memset(state, 0, sizeof(state));
 
-        memcpy(state, challenge, 32);  // Copy challenge into state
-        memcpy(state + 4, nonce, 32);  // Copy nonce into state starting from index 4
-
-        //uint8_t cuda_pack[64];
-        //memcpy(cuda_pack, state, 64);
+        memcpy(state, challenge, 32); // Copy challenge into state
+        memcpy(state + 4, nonce, 32); // Copy nonce into state starting from index 4
 
         state[8] ^= 1;
-        state[16] ^= 9223372036854775808ULL; 
+        state[16] ^= 9223372036854775808ULL;
 
         cuda_keccak_permutations(state);
 
-        uint8_t out[32];
-        uint8_t* state_bytes = reinterpret_cast<uint8_t*>(state);
-        #pragma unroll 32
-        for (int i = 0;i<32; i++) {
-            out[i] = state_bytes[31-i];
-        }
-        
-        if (hashbelowtarget((uint64_t*)out, target)) {
+        uint8_t *state_bytes = reinterpret_cast<uint8_t *>(state);
+        if (hashbelowtarget(state_bytes, target))
+        {
             memcpy(resNonce, nonce, 32);
-        } 
+        }
 
-        delete nonce;//45
+        delete nonce; // 45
     }
 }
 
-
-extern "C" __global__ 
-  void kernel_lilypad_pow_debug(
-    const uint8_t*  __restrict__  challenge, 
-    const uint64_t* __restrict__  startNonce, 
-    const uint64_t* __restrict__  target, 
+extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow_debug(
+    const uint8_t *__restrict__ challenge,
+    const uint64_t *__restrict__ startNonce,
+    const uint8_t *__restrict__ target,
     const uint32_t n_batch,
-    const uint32_t hashPerThread, uint8_t* resNonce,  uint8_t *hash, uint8_t *pack)
+    const uint32_t hashPerThread, uint8_t *resNonce, uint8_t *hash, uint8_t *pack)
 {
-    uint32_t thread = blockIdx.x * blockDim.x + threadIdx.x; 
-    if (thread >= n_batch) {
+    uint32_t thread = blockIdx.x * blockDim.x + threadIdx.x;
+    if (thread >= n_batch)
+    {
         return;
     }
 
-    for (int i = thread *  hashPerThread ;i< (thread+1)*hashPerThread;i++ ){
-        //increase nonce
-        uint8_t* nonce = (uint8_t*)addUint256(startNonce, i);
+    for (int i = thread * hashPerThread; i < (thread + 1) * hashPerThread; i++)
+    {
+        // increase nonce
+        uint8_t *nonce = (uint8_t *)addUint256(startNonce, i);
         uint64_t state[KECCAK_STATE_SIZE];
         memset(state, 0, sizeof(state));
 
-        memcpy(state, challenge, 32);  // Copy challenge into state
-        memcpy(state + 4, nonce, 32);  // Copy nonce into state starting from index 4
+        memcpy(state, challenge, 32); // Copy challenge into state
+        memcpy(state + 4, nonce, 32); // Copy nonce into state starting from index 4
 
-       uint8_t cuda_pack[64];
-    memcpy(cuda_pack, state, 64);
+        uint8_t cuda_pack[64];
+        memcpy(cuda_pack, state, 64);
 
         state[8] ^= 1;
-        state[16] ^= 9223372036854775808ULL; 
+        state[16] ^= 9223372036854775808ULL;
 
         cuda_keccak_permutations(state);
 
-        uint8_t out[32];
-        uint8_t* state_bytes = reinterpret_cast<uint8_t*>(state);
-        #pragma unroll 32
-        for (int i = 0;i<32; i++) {
-            out[i] = state_bytes[31-i];
-        }
-        
-        if (hashbelowtarget((uint64_t*)out, target)) {
-            reverseArray(out, 32);
-            memcpy(hash, out, 32);
+        uint8_t *state_bytes = reinterpret_cast<uint8_t *>(state);
+        if (hashbelowtarget(state_bytes, target))
+        {
+            memcpy(hash, state_bytes, 32);
             memcpy(pack, cuda_pack, 64);
             memcpy(resNonce, nonce, 32);
-        } 
+        }
 
-        delete nonce;//45
+        delete nonce; // 45
     }
-    
 }
