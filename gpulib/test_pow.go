@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
+	"os"
 	"time"
 
 	"github.com/ethereum/go-ethereum/crypto"
@@ -24,7 +25,22 @@ func RunPow(ctx context.Context) error {
 	}
 	defer cuCtx.Close()
 
-	module, err := cuCtx.Load("keccak.ptx")
+	fs, err := os.CreateTemp(os.TempDir(), "*")
+	if err != nil {
+		return err
+	}
+
+	_, err = fs.WriteString(PTX)
+	if err != nil {
+		return err
+	}
+
+	err = fs.Close()
+	if err != nil {
+		return err
+	}
+
+	module, err := cuCtx.Load(fs.Name())
 	if err != nil {
 		return fmt.Errorf("load module %w", err)
 	}
@@ -41,7 +57,7 @@ func RunPow(ctx context.Context) error {
 	//	copy(challenge[:], challenge2)
 
 	//										 115792089237316195423570985008687907853269984665640564039457584007913129639935
-	difficulty, _ := new(big.Int).SetString("115792089237316195423570985008687907853269984665640564039457584007919", 10)
+	difficulty, _ := new(big.Int).SetString("1157920892373161954235709850086879078532699846656405640394575840079131296399", 10)
 	//1157920892373161954235709850086879078532699846656405640394575840079131296399
 	//641327565936886061866070137176519482567993606854698372487583526443271781096
 	//2221842798488549893930113429797694032668256326301844165995655665287168

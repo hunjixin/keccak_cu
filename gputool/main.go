@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github/hunjixin/keccak_cu/gpulib"
 	"math/big"
+	"os"
 	"time"
 
 	"gorgonia.org/cu"
@@ -46,7 +47,22 @@ func runPow(ctx context.Context) error {
 	}
 	defer cuCtx.Close()
 
-	module, err := cuCtx.Load("../keccak.ptx")
+	fs, err := os.CreateTemp(os.TempDir(), "*")
+	if err != nil {
+		return err
+	}
+
+	_, err = fs.WriteString(gpulib.PTX)
+	if err != nil {
+		return err
+	}
+
+	err = fs.Close()
+	if err != nil {
+		return err
+	}
+
+	module, err := cuCtx.Load(fs.Name())
 	if err != nil {
 		return err
 	}

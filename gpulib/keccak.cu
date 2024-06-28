@@ -438,8 +438,9 @@ __device__ uint64_t *addUint256(const uint64_t *a, const uint64_t b)
     return result;
 }
 
+#define THREAD_NUMBBER 256
 
-extern "C" __global__ __launch_bounds__(256) void kernel_lilypad_pow(
+extern "C" __global__ __launch_bounds__(THREAD_NUMBBER) void kernel_lilypad_pow(
     const uint8_t *__restrict__ challenge,
     const uint64_t *__restrict__ startNonce,
     const uint8_t *__restrict__ target,
@@ -451,11 +452,11 @@ extern "C" __global__ __launch_bounds__(256) void kernel_lilypad_pow(
     {
         return;
     }
-	if (threadIdx.x >=256) {
+	if (threadIdx.x >=THREAD_NUMBBER) {
 		return;
 	}
 
-    nonce_t states[256][KECCAK_STATE_SIZE];
+    nonce_t states[THREAD_NUMBBER][KECCAK_STATE_SIZE];
     for (int i = thread * hashPerThread; i < (thread + 1) * hashPerThread; i++)
     {
         // increase nonce
@@ -483,7 +484,7 @@ extern "C" __global__ __launch_bounds__(256) void kernel_lilypad_pow(
 }
 
 
-extern "C" __global__ __launch_bounds__(256) void kernel_lilypad_pow_debug(
+extern "C" __global__ __launch_bounds__(THREAD_NUMBBER) void kernel_lilypad_pow_debug(
     const uint8_t *__restrict__ challenge,
     const uint64_t *__restrict__ startNonce,
     const uint8_t *__restrict__ target,
@@ -495,10 +496,10 @@ extern "C" __global__ __launch_bounds__(256) void kernel_lilypad_pow_debug(
     {
         return;
     }
-	if (threadIdx.x >=256) {
+	if (threadIdx.x >=THREAD_NUMBBER) {
 		return;
 	}
-    nonce_t states[256][KECCAK_STATE_SIZE];
+   	__shared__ nonce_t states[THREAD_NUMBBER][KECCAK_STATE_SIZE];
     for (int i = thread * hashPerThread; i < (thread + 1) * hashPerThread; i++)
     {
         // increase nonce

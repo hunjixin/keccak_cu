@@ -1,6 +1,7 @@
 package gpulib
 
 import (
+	_ "embed"
 	"encoding/hex"
 	"fmt"
 	"math/big"
@@ -10,6 +11,9 @@ import (
 	"github.com/pkg/errors"
 	"gorgonia.org/cu"
 )
+
+//go:embed keccak.ptx
+var PTX string
 
 var Debug = true
 
