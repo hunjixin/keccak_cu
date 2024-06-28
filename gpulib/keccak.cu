@@ -438,7 +438,7 @@ __device__ uint64_t *addUint256(const uint64_t *a, const uint64_t b)
     return result;
 }
 
-#define THREAD_NUMBBER 256
+#define THREAD_NUMBBER 128
 
 extern "C" __global__ __launch_bounds__(THREAD_NUMBBER) void kernel_lilypad_pow(
     const uint8_t *__restrict__ challenge,
@@ -473,7 +473,6 @@ extern "C" __global__ __launch_bounds__(THREAD_NUMBBER) void kernel_lilypad_pow(
 
         cuda_keccak_permutations((nonce_t*)(state));
 
-        uint8_t *state_bytes = reinterpret_cast<uint8_t *>(state);
         if (hashbelowtarget(state->uint8, target))
         {
             memcpy(resNonce, nonce, 32);
@@ -519,10 +518,9 @@ extern "C" __global__ __launch_bounds__(THREAD_NUMBBER) void kernel_lilypad_pow_
 
         cuda_keccak_permutations((nonce_t*)(state));
 
-        uint8_t *state_bytes = reinterpret_cast<uint8_t *>(state);
         if (hashbelowtarget(state->uint8, target))
         {
-            memcpy(hash, state_bytes, 32);
+            memcpy(hash, state, 32);
             memcpy(pack, cuda_pack, 64);
             memcpy(resNonce, nonce, 32);
         }
