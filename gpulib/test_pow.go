@@ -67,7 +67,7 @@ func RunPow(ctx context.Context) error {
 
 	fmt.Println(hex.EncodeToString(difficulty.Bytes()))
 	thread := 38
-	block := 256
+	block := 200
 	batch := thread * block
 	threadPerThread := 100
 	for {

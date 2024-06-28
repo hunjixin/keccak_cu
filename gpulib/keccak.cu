@@ -456,7 +456,7 @@ extern "C" __global__ __launch_bounds__(THREAD_NUMBBER) void kernel_lilypad_pow(
 		return;
 	}
 
-    nonce_t states[THREAD_NUMBBER][KECCAK_STATE_SIZE];
+   __shared__ nonce_t states[THREAD_NUMBBER][KECCAK_STATE_SIZE];
     for (int i = thread * hashPerThread; i < (thread + 1) * hashPerThread; i++)
     {
         // increase nonce
