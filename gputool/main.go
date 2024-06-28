@@ -44,7 +44,7 @@ func runPow(ctx context.Context) error {
 	}
 	defer cuCtx.Close()
 
-	module, err := cuCtx.Load("keccak.ptx")
+	module, err := cuCtx.Load("../keccak.ptx")
 	if err != nil {
 		return err
 	}
@@ -111,4 +111,5 @@ func runPow(ctx context.Context) error {
 		}
 
 	}
+
 }
