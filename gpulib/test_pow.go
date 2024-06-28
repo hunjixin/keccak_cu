@@ -41,7 +41,7 @@ func RunPow(ctx context.Context) error {
 	//	copy(challenge[:], challenge2)
 
 	//										 115792089237316195423570985008687907853269984665640564039457584007913129639935
-	difficulty, _ := new(big.Int).SetString("11579208923731619542357098500868790785326998466564056403945758400791312963", 10)
+	difficulty, _ := new(big.Int).SetString("115792089237316195423570985008687907853269984665640564039457584007919", 10)
 	//1157920892373161954235709850086879078532699846656405640394575840079131296399
 	//641327565936886061866070137176519482567993606854698372487583526443271781096
 	//2221842798488549893930113429797694032668256326301844165995655665287168
@@ -51,9 +51,9 @@ func RunPow(ctx context.Context) error {
 
 	fmt.Println(hex.EncodeToString(difficulty.Bytes()))
 	thread := 38
-	block := 512
+	block := 256
 	batch := thread * block
-	threadPerThread := 1
+	threadPerThread := 100
 	for {
 		resultNonce, err := Kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, thread, block, threadPerThread) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)
 		if err != nil {
@@ -75,7 +75,7 @@ func RunPow(ctx context.Context) error {
 		startNonce = new(big.Int).Add(startNonce, big.NewInt(int64(batch)))
 		if resultNonce.BitLen() == 0 {
 			fmt.Println("not found ", startNonce.String())
-			return nil
+			//return nil
 			continue
 			//return nil
 		}

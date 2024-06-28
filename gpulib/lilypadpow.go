@@ -29,6 +29,16 @@ func Kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 		return nil, err
 	}
 
+	dHash, err := cuCtx.MemAllocManaged(32, cu.AttachGlobal)
+	if err != nil {
+		return nil, err
+	}
+
+	dPack, err := cuCtx.MemAllocManaged(64, cu.AttachGlobal)
+	if err != nil {
+		return nil, err
+	}
+
 	dOut, err := cuCtx.MemAllocManaged(32, cu.AttachGlobal)
 	if err != nil {
 		return nil, err
@@ -43,6 +53,8 @@ func Kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 		unsafe.Pointer(&batch),
 		unsafe.Pointer(&hashPerThread),
 		unsafe.Pointer(&dOut),
+		unsafe.Pointer(&dHash),
+		unsafe.Pointer(&dPack),
 	}
 
 	cuCtx.MemcpyHtoD(dIn1, unsafe.Pointer(&challenge[0]), 32)
@@ -62,9 +74,23 @@ func Kernel_lilypad_pow_with_ctx(cuCtx *cu.Ctx, fn cu.Function, challenge [32]by
 	hOut := make([]byte, 32)
 	cuCtx.MemcpyDtoH(unsafe.Pointer(&hOut[0]), dOut, 32)
 
+	hHash := make([]byte, 32)
+	cuCtx.MemcpyDtoH(unsafe.Pointer(&hHash[0]), dHash, 32)
+	if Debug {
+		fmt.Println("cuda hash result:", hex.EncodeToString(hHash))
+	}
+
+	hPack := make([]byte, 64)
+	cuCtx.MemcpyDtoH(unsafe.Pointer(&hPack[0]), dPack, 64)
+
+	if Debug {
+		fmt.Println("cuda pack result: ", hex.EncodeToString(hPack))
+	}
 	cuCtx.MemFree(dIn1)
 	cuCtx.MemFree(dIn2)
 	cuCtx.MemFree(dIn3)
+	cuCtx.MemFree(dHash)
+	cuCtx.MemFree(dPack)
 	cuCtx.MemFree(dOut)
 
 	return new(big.Int).SetBytes(hOut), nil

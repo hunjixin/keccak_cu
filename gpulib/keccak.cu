@@ -439,25 +439,30 @@ __device__ uint64_t *addUint256(const uint64_t *a, const uint64_t b)
 }
 
 
-extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow(
+extern "C" __global__ __launch_bounds__(256) void kernel_lilypad_pow(
     const uint8_t *__restrict__ challenge,
     const uint64_t *__restrict__ startNonce,
     const uint8_t *__restrict__ target,
     const uint32_t n_batch,
     const uint32_t hashPerThread, uint8_t *resNonce)
 {
-    uint32_t thread = blockIdx.x * blockDim.x + threadIdx.x;
+     uint32_t thread = blockIdx.x * blockDim.x + threadIdx.x;
     if (thread >= n_batch)
     {
         return;
     }
+	if (threadIdx.x >=256) {
+		return;
+	}
 
+    nonce_t states[256][KECCAK_STATE_SIZE];
     for (int i = thread * hashPerThread; i < (thread + 1) * hashPerThread; i++)
     {
         // increase nonce
         uint8_t *nonce = (uint8_t *)addUint256(startNonce, i);
-        nonce_t state[KECCAK_STATE_SIZE];
-        memset(state, 0, sizeof(state));
+		nonce_t* state = states[threadIdx.x];
+
+        memset(state, 0, 200);
 
         memcpy(state, challenge, 32); // Copy challenge into state
         memcpy(state + 4, nonce, 32); // Copy nonce into state starting from index 4
@@ -467,6 +472,7 @@ extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow(
 
         cuda_keccak_permutations((nonce_t*)(state));
 
+        uint8_t *state_bytes = reinterpret_cast<uint8_t *>(state);
         if (hashbelowtarget(state->uint8, target))
         {
             memcpy(resNonce, nonce, 32);
@@ -477,7 +483,7 @@ extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow(
 }
 
 
-extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow_debug(
+extern "C" __global__ __launch_bounds__(256) void kernel_lilypad_pow_debug(
     const uint8_t *__restrict__ challenge,
     const uint64_t *__restrict__ startNonce,
     const uint8_t *__restrict__ target,
@@ -489,13 +495,17 @@ extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow_debug(
     {
         return;
     }
-
+	if (threadIdx.x >=256) {
+		return;
+	}
+    nonce_t states[256][KECCAK_STATE_SIZE];
     for (int i = thread * hashPerThread; i < (thread + 1) * hashPerThread; i++)
     {
         // increase nonce
         uint8_t *nonce = (uint8_t *)addUint256(startNonce, i);
-        nonce_t state[KECCAK_STATE_SIZE];
-        memset(state, 0, sizeof(state));
+		nonce_t* state = states[threadIdx.x];
+
+        memset(state, 0, 200);
 
         memcpy(state, challenge, 32); // Copy challenge into state
         memcpy(state + 4, nonce, 32); // Copy nonce into state starting from index 4

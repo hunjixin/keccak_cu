@@ -18,6 +18,7 @@ var threadPerThread int
 var difficultyStr string
 
 func main() {
+	gpulib.Debug = false
 	flag.IntVar(&grid, "grid", 38, "grid size")
 	flag.IntVar(&block, "block", 1024, "block size")
 	flag.IntVar(&threadPerThread, "hash_per_thread", 1, "hash to calculate per threads")
@@ -28,7 +29,7 @@ func main() {
 
 func runPow(ctx context.Context) error {
 	dev2, _ := cu.GetDevice(0)
-	values, err := dev2.Attributes(cu.MaxRegistersPerBlock, cu.RegistersPerBlock, cu.MaxBlockDimX, cu.MaxBlockDimX, cu.MultiprocessorCount)
+	values, err := dev2.Attributes(cu.MaxRegistersPerBlock, cu.RegistersPerBlock, cu.MaxBlockDimX, cu.MaxBlockDimX, cu.MultiprocessorCount, cu.MaxSharedMemoryPerBlock)
 	if err != nil {
 		return err
 	}
@@ -37,6 +38,7 @@ func runPow(ctx context.Context) error {
 	fmt.Println("MaxBlockDimX", values[2])
 	fmt.Println("MaxBlockDimX", values[3])
 	fmt.Println("MultiprocessorCount", values[4])
+	fmt.Println("MaxSharedMemoryPerBlock", values[5])
 
 	cuCtx, err := gpulib.SetupGPU()
 	if err != nil {
@@ -84,7 +86,7 @@ func runPow(ctx context.Context) error {
 		if count%(batch*4) == 0 {
 			secs := time.Since(nowT).Seconds()
 			if secs > 0 {
-				fmt.Println("speed MHASH/s", float64(count/1000/1000)/secs)
+				fmt.Printf("%f speed MHASH/s\n", float64(count/1000/1000)/secs)
 			}
 		}
 		curNonce = new(big.Int).Add(curNonce, big.NewInt(int64(batch)))
