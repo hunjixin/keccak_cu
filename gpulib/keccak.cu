@@ -250,7 +250,7 @@ extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow_debug(
         return;
     }
 
-    int wrapInOneLaunch = thread / 32;
+    uint64_t wrapInOneLaunch = thread / 32;
     int threadIndexInWrap = thread % 32; // index in wrap
     if (threadIndexInWrap >= 25)         // abort 26-32 thread
     {
@@ -271,8 +271,8 @@ extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow_debug(
     // printf("C[0] %d\n",  C[1]);
 
     __syncwarp();
-    int nonceOffset = wrapInOneLaunch * hashPerThread;
-    int endNonceOffset = (wrapInOneLaunch + 1) * hashPerThread;
+    uint64_t nonceOffset = wrapInOneLaunch * hashPerThread;
+    uint64_t endNonceOffset = (wrapInOneLaunch + 1) * hashPerThread;
     for (; nonceOffset < endNonceOffset; nonceOffset++)
     {
         uint8_t cuda_pack[64];
