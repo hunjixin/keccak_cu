@@ -10,7 +10,13 @@
 .target sm_52
 .address_size 64
 
-	// .globl	kernel_lilypad_pow
+	// .globl	kernel_lilypad_pow_debug
+.extern .func  (.param .b32 func_retval0) vprintf
+(
+	.param .b64 vprintf_param_0,
+	.param .b64 vprintf_param_1
+)
+;
 .extern .func  (.param .b64 func_retval0) malloc
 (
 	.param .b64 malloc_param_0
@@ -22,668 +28,13 @@
 )
 ;
 .const .align 8 .b8 CUDA_KECCAK_CONSTS[192] = {1, 0, 0, 0, 0, 0, 0, 0, 130, 128, 0, 0, 0, 0, 0, 0, 138, 128, 0, 0, 0, 0, 0, 128, 0, 128, 0, 128, 0, 0, 0, 128, 139, 128, 0, 0, 0, 0, 0, 0, 1, 0, 0, 128, 0, 0, 0, 0, 129, 128, 0, 128, 0, 0, 0, 128, 9, 128, 0, 0, 0, 0, 0, 128, 138, 0, 0, 0, 0, 0, 0, 0, 136, 0, 0, 0, 0, 0, 0, 0, 9, 128, 0, 128, 0, 0, 0, 0, 10, 0, 0, 128, 0, 0, 0, 0, 139, 128, 0, 128, 0, 0, 0, 0, 139, 0, 0, 0, 0, 0, 0, 128, 137, 128, 0, 0, 0, 0, 0, 128, 3, 128, 0, 0, 0, 0, 0, 128, 2, 128, 0, 0, 0, 0, 0, 128, 128, 0, 0, 0, 0, 0, 0, 128, 10, 128, 0, 0, 0, 0, 0, 0, 10, 0, 0, 128, 0, 0, 0, 128, 129, 128, 0, 128, 0, 0, 0, 128, 128, 128, 0, 0, 0, 0, 0, 128, 1, 0, 0, 128, 0, 0, 0, 0, 8, 128, 0, 128, 0, 0, 0, 128};
-.const .align 4 .b8 r[96] = {1, 0, 0, 0, 3, 0, 0, 0, 6, 0, 0, 0, 10, 0, 0, 0, 15, 0, 0, 0, 21, 0, 0, 0, 28, 0, 0, 0, 36, 0, 0, 0, 45, 0, 0, 0, 55, 0, 0, 0, 2, 0, 0, 0, 14, 0, 0, 0, 27, 0, 0, 0, 41, 0, 0, 0, 56, 0, 0, 0, 8, 0, 0, 0, 25, 0, 0, 0, 43, 0, 0, 0, 62, 0, 0, 0, 18, 0, 0, 0, 39, 0, 0, 0, 61, 0, 0, 0, 20, 0, 0, 0, 44, 0, 0, 0};
-.const .align 4 .b8 piln[96] = {10, 0, 0, 0, 7, 0, 0, 0, 11, 0, 0, 0, 17, 0, 0, 0, 18, 0, 0, 0, 3, 0, 0, 0, 5, 0, 0, 0, 16, 0, 0, 0, 8, 0, 0, 0, 21, 0, 0, 0, 24, 0, 0, 0, 4, 0, 0, 0, 15, 0, 0, 0, 23, 0, 0, 0, 19, 0, 0, 0, 13, 0, 0, 0, 12, 0, 0, 0, 2, 0, 0, 0, 20, 0, 0, 0, 14, 0, 0, 0, 22, 0, 0, 0, 9, 0, 0, 0, 6, 0, 0, 0, 1, 0, 0, 0};
-.const .align 8 .b8 rc[960] = {1, 0, 0, 0, 0, 0, 0, 0, 130, 128, 0, 0, 0, 0, 0, 0, 138, 128, 0, 0, 0, 0, 0, 128, 0, 128, 0, 128, 0, 0, 0, 128, 139, 128, 0, 0, 0, 0, 0, 0, 1, 0, 0, 128, 0, 0, 0, 0, 129, 128, 0, 128, 0, 0, 0, 128, 9, 128, 0, 0, 0, 0, 0, 128, 138, 0, 0, 0, 0, 0, 0, 0, 136, 0, 0, 0, 0, 0, 0, 0, 9, 128, 0, 128, 0, 0, 0, 0, 10, 0, 0, 128, 0, 0, 0, 0, 139, 128, 0, 128, 0, 0, 0, 0, 139, 0, 0, 0, 0, 0, 0, 128, 137, 128, 0, 0, 0, 0, 0, 128, 3, 128, 0, 0, 0, 0, 0, 128, 2, 128, 0, 0, 0, 0, 0, 128, 128, 0, 0, 0, 0, 0, 0, 128, 10, 128, 0, 0, 0, 0, 0, 0, 10, 0, 0, 128, 0, 0, 0, 128, 129, 128, 0, 128, 0, 0, 0, 128, 128, 128, 0, 0, 0, 0, 0, 128, 1, 0, 0, 128, 0, 0, 0, 0, 8, 128, 0, 128, 0, 0, 0, 128, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-.const .align 4 .b8 ro[200] = {0, 0, 0, 0, 64, 0, 0, 0, 44, 0, 0, 0, 20, 0, 0, 0, 43, 0, 0, 0, 21, 0, 0, 0, 21, 0, 0, 0, 43, 0, 0, 0, 14, 0, 0, 0, 50, 0, 0, 0, 1, 0, 0, 0, 63, 0, 0, 0, 6, 0, 0, 0, 58, 0, 0, 0, 25, 0, 0, 0, 39, 0, 0, 0, 8, 0, 0, 0, 56, 0, 0, 0, 18, 0, 0, 0, 46, 0, 0, 0, 62, 0, 0, 0, 2, 0, 0, 0, 55, 0, 0, 0, 9, 0, 0, 0, 39, 0, 0, 0, 25, 0, 0, 0, 41, 0, 0, 0, 23, 0, 0, 0, 2, 0, 0, 0, 62, 0, 0, 0, 28, 0, 0, 0, 36, 0, 0, 0, 20, 0, 0, 0, 44, 0, 0, 0, 3, 0, 0, 0, 61, 0, 0, 0, 45, 0, 0, 0, 19, 0, 0, 0, 61, 0, 0, 0, 3, 0, 0, 0, 27, 0, 0, 0, 37, 0, 0, 0, 36, 0, 0, 0, 28, 0, 0, 0, 10, 0, 0, 0, 54, 0, 0, 0, 15, 0, 0, 0, 49, 0, 0, 0, 56, 0, 0, 0, 8, 0, 0, 0};
-.const .align 4 .b8 a[100] = {0, 0, 0, 0, 6, 0, 0, 0, 12, 0, 0, 0, 18, 0, 0, 0, 24, 0, 0, 0, 1, 0, 0, 0, 7, 0, 0, 0, 13, 0, 0, 0, 19, 0, 0, 0, 20, 0, 0, 0, 2, 0, 0, 0, 8, 0, 0, 0, 14, 0, 0, 0, 15, 0, 0, 0, 21, 0, 0, 0, 3, 0, 0, 0, 9, 0, 0, 0, 10, 0, 0, 0, 16, 0, 0, 0, 22, 0, 0, 0, 4, 0, 0, 0, 5, 0, 0, 0, 11, 0, 0, 0, 17, 0, 0, 0, 23, 0, 0, 0};
-.const .align 4 .b8 b[100] = {0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0};
-.const .align 4 .b8 c[300] = {0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 5, 0, 0, 0, 6, 0, 0, 0, 7, 0, 0, 0, 6, 0, 0, 0, 7, 0, 0, 0, 8, 0, 0, 0, 7, 0, 0, 0, 8, 0, 0, 0, 9, 0, 0, 0, 8, 0, 0, 0, 9, 0, 0, 0, 5, 0, 0, 0, 9, 0, 0, 0, 5, 0, 0, 0, 6, 0, 0, 0, 10, 0, 0, 0, 11, 0, 0, 0, 12, 0, 0, 0, 11, 0, 0, 0, 12, 0, 0, 0, 13, 0, 0, 0, 12, 0, 0, 0, 13, 0, 0, 0, 14, 0, 0, 0, 13, 0, 0, 0, 14, 0, 0, 0, 10, 0, 0, 0, 14, 0, 0, 0, 10, 0, 0, 0, 11, 0, 0, 0, 15, 0, 0, 0, 16, 0, 0, 0, 17, 0, 0, 0, 16, 0, 0, 0, 17, 0, 0, 0, 18, 0, 0, 0, 17, 0, 0, 0, 18, 0, 0, 0, 19, 0, 0, 0, 18, 0, 0, 0, 19, 0, 0, 0, 15, 0, 0, 0, 19, 0, 0, 0, 15, 0, 0, 0, 16, 0, 0, 0, 20, 0, 0, 0, 21, 0, 0, 0, 22, 0, 0, 0, 21, 0, 0, 0, 22, 0, 0, 0, 23, 0, 0, 0, 22, 0, 0, 0, 23, 0, 0, 0, 24, 0, 0, 0, 23, 0, 0, 0, 24, 0, 0, 0, 20, 0, 0, 0, 24, 0, 0, 0, 20, 0, 0, 0, 21, 0, 0, 0};
-.const .align 4 .b8 d[100] = {0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 10, 0, 0, 0, 11, 0, 0, 0, 12, 0, 0, 0, 13, 0, 0, 0, 14, 0, 0, 0, 20, 0, 0, 0, 21, 0, 0, 0, 22, 0, 0, 0, 23, 0, 0, 0, 24, 0, 0, 0, 5, 0, 0, 0, 6, 0, 0, 0, 7, 0, 0, 0, 8, 0, 0, 0, 9, 0, 0, 0, 15, 0, 0, 0, 16, 0, 0, 0, 17, 0, 0, 0, 18, 0, 0, 0, 19, 0, 0, 0};
-// _ZZ18kernel_lilypad_powE12stateInBlock has been demoted
-// _ZZ18kernel_lilypad_powE8cInBlock has been demoted
-// _ZZ18kernel_lilypad_powE8dInBlock has been demoted
+.const .align 1 .b8 g_ppi_aux[50] = {0, 0, 6, 44, 12, 43, 18, 21, 24, 14, 3, 28, 9, 20, 10, 3, 16, 45, 22, 61, 1, 1, 7, 6, 13, 25, 19, 8, 20, 18, 4, 27, 5, 36, 11, 10, 17, 15, 23, 56, 2, 62, 8, 55, 14, 39, 15, 41, 21, 2};
+.const .align 1 .b8 g_ksi_aux[50] = {1, 2, 2, 3, 3, 4, 4, 0, 0, 1, 6, 7, 7, 8, 8, 9, 9, 5, 5, 6, 11, 12, 12, 13, 13, 14, 14, 10, 10, 11, 16, 17, 17, 18, 18, 19, 19, 15, 15, 16, 21, 22, 22, 23, 23, 24, 24, 20, 20, 21};
+.const .align 8 .b8 g_iota_aux[192] = {1, 0, 0, 0, 0, 0, 0, 0, 130, 128, 0, 0, 0, 0, 0, 0, 138, 128, 0, 0, 0, 0, 0, 128, 0, 128, 0, 128, 0, 0, 0, 128, 139, 128, 0, 0, 0, 0, 0, 0, 1, 0, 0, 128, 0, 0, 0, 0, 129, 128, 0, 128, 0, 0, 0, 128, 9, 128, 0, 0, 0, 0, 0, 128, 138, 0, 0, 0, 0, 0, 0, 0, 136, 0, 0, 0, 0, 0, 0, 0, 9, 128, 0, 128, 0, 0, 0, 0, 10, 0, 0, 128, 0, 0, 0, 0, 139, 128, 0, 128, 0, 0, 0, 0, 139, 0, 0, 0, 0, 0, 0, 128, 137, 128, 0, 0, 0, 0, 0, 128, 3, 128, 0, 0, 0, 0, 0, 128, 2, 128, 0, 0, 0, 0, 0, 128, 128, 0, 0, 0, 0, 0, 0, 128, 10, 128, 0, 0, 0, 0, 0, 0, 10, 0, 0, 128, 0, 0, 0, 128, 129, 128, 0, 128, 0, 0, 0, 128, 128, 128, 0, 0, 0, 0, 0, 128, 1, 0, 0, 128, 0, 0, 0, 0, 8, 128, 0, 128, 0, 0, 0, 128};
 // _ZZ24kernel_lilypad_pow_debugE12stateInBlock has been demoted
 // _ZZ24kernel_lilypad_pow_debugE8cInBlock has been demoted
-// _ZZ24kernel_lilypad_pow_debugE8dInBlock has been demoted
+.global .align 1 .b8 $str[4] = {37, 100, 10, 0};
 
-.visible .entry kernel_lilypad_pow(
-	.param .u64 kernel_lilypad_pow_param_0,
-	.param .u64 kernel_lilypad_pow_param_1,
-	.param .u64 kernel_lilypad_pow_param_2,
-	.param .u32 kernel_lilypad_pow_param_3,
-	.param .u32 kernel_lilypad_pow_param_4,
-	.param .u64 kernel_lilypad_pow_param_5
-)
-.maxntid 1536, 1, 1
-{
-	.reg .pred 	%p<23>;
-	.reg .b16 	%rs<61>;
-	.reg .b32 	%r<150>;
-	.reg .b64 	%rd<272>;
-	.loc	1 177 0
-	// demoted variable
-	.shared .align 8 .b8 _ZZ18kernel_lilypad_powE12stateInBlock[6400];
-	// demoted variable
-	.shared .align 8 .b8 _ZZ18kernel_lilypad_powE8cInBlock[6400];
-	// demoted variable
-	.shared .align 8 .b8 _ZZ18kernel_lilypad_powE8dInBlock[6400];
-
-	ld.param.u64 	%rd29, [kernel_lilypad_pow_param_0];
-	ld.param.u64 	%rd30, [kernel_lilypad_pow_param_1];
-	ld.param.u64 	%rd31, [kernel_lilypad_pow_param_2];
-	ld.param.u32 	%r26, [kernel_lilypad_pow_param_3];
-	ld.param.u32 	%r25, [kernel_lilypad_pow_param_4];
-	ld.param.u64 	%rd32, [kernel_lilypad_pow_param_5];
-	.loc	1 184 16
-	mov.u32 	%r27, %ctaid.x;
-	mov.u32 	%r28, %ntid.x;
-	mov.u32 	%r1, %tid.x;
-	mad.lo.s32 	%r2, %r27, %r28, %r1;
-	.loc	1 185 5
-	setp.ge.u32 	%p1, %r2, %r26;
-	@%p1 bra 	$L__BB0_25;
-
-	.loc	1 191 27
-	shr.s32 	%r29, %r2, 31;
-	shr.u32 	%r30, %r29, 27;
-	add.s32 	%r31, %r2, %r30;
-	and.b32  	%r32, %r31, -32;
-	sub.s32 	%r3, %r2, %r32;
-	.loc	1 192 5
-	setp.gt.s32 	%p2, %r3, 24;
-	@%p2 bra 	$L__BB0_25;
-
-	.loc	1 190 25
-	shr.s32 	%r36, %r31, 5;
-	.loc	1 197 26
-	shr.u32 	%r4, %r1, 5;
-	.loc	1 207 5
-	mul.lo.s32 	%r37, %r4, 200;
-	mov.u32 	%r38, _ZZ18kernel_lilypad_powE8cInBlock;
-	add.s32 	%r39, %r38, %r37;
-	shl.b32 	%r40, %r3, 3;
-	add.s32 	%r41, %r39, %r40;
-	mov.u64 	%rd33, 0;
-	st.shared.u64 	[%r41], %rd33;
-	.loc	1 208 5
-	mov.u32 	%r42, _ZZ18kernel_lilypad_powE8dInBlock;
-	add.s32 	%r43, %r42, %r37;
-	add.s32 	%r44, %r43, %r40;
-	st.shared.u64 	[%r44], %rd33;
-	.loc	1 210 5
-	.loc	2 110 3, function_name $L__info_string0, inlined_at 1 210 5
-	bar.warp.sync 	-1;
-	.loc	1 211 21
-	mul.lo.s32 	%r147, %r36, %r25;
-	.loc	1 212 24
-	add.s32 	%r6, %r147, %r25;
-	.loc	1 213 5
-	setp.ge.s32 	%p3, %r147, %r6;
-	@%p3 bra 	$L__BB0_25;
-
-	.loc	1 0 5
-	mul.hi.s32 	%r45, %r3, 1717986919;
-	shr.u32 	%r46, %r45, 31;
-	shr.s32 	%r47, %r45, 1;
-	add.s32 	%r48, %r47, %r46;
-	mul.lo.s32 	%r49, %r48, 5;
-	sub.s32 	%r50, %r3, %r49;
-	mov.u32 	%r51, _ZZ18kernel_lilypad_powE12stateInBlock;
-	mad.lo.s32 	%r52, %r4, 200, %r51;
-	shl.b32 	%r53, %r50, 3;
-	add.s32 	%r7, %r52, %r53;
-	add.s32 	%r54, %r50, 5;
-	add.s32 	%r55, %r50, 20;
-	mul.wide.s32 	%rd35, %r55, 4;
-	mov.u64 	%rd36, b;
-	add.s64 	%rd1, %rd36, %rd35;
-	mul.wide.s32 	%rd37, %r54, 4;
-	add.s64 	%rd2, %rd36, %rd37;
-	mul.wide.s32 	%rd38, %r3, 4;
-	mov.u64 	%rd39, a;
-	add.s64 	%rd3, %rd39, %rd38;
-	add.s64 	%rd4, %rd36, %rd38;
-	mul.wide.s32 	%rd40, %r3, 8;
-	mov.u64 	%rd41, ro;
-	add.s64 	%rd5, %rd41, %rd40;
-	mul.wide.s32 	%rd42, %r3, 12;
-	mov.u64 	%rd43, c;
-	add.s64 	%rd6, %rd43, %rd42;
-	mov.u64 	%rd44, d;
-	add.s64 	%rd7, %rd44, %rd38;
-	cvta.to.global.u64 	%rd49, %rd30;
-	cvta.to.global.u64 	%rd11, %rd29;
-	ld.const.u32 	%r77, [%rd1];
-	shl.b32 	%r81, %r77, 3;
-	ld.const.u32 	%r82, [%rd2];
-	shl.b32 	%r83, %r82, 3;
-	ld.const.u32 	%r84, [%rd3];
-	shl.b32 	%r87, %r84, 3;
-	ld.const.u32 	%r88, [%rd4];
-	shl.b32 	%r91, %r88, 3;
-	ld.const.u32 	%rd17, [%rd5];
-	ld.const.u32 	%rd18, [%rd5+4];
-	ld.const.u32 	%r92, [%rd6];
-	shl.b32 	%r93, %r92, 3;
-	ld.const.u32 	%r94, [%rd6+4];
-	shl.b32 	%r95, %r94, 3;
-	ld.const.u32 	%r96, [%rd6+8];
-	shl.b32 	%r97, %r96, 3;
-	ld.const.u32 	%r98, [%rd7];
-	shl.b32 	%r99, %r98, 3;
-	cvta.to.global.u64 	%rd22, %rd31;
-	cvta.to.global.u64 	%rd26, %rd32;
-
-$L__BB0_4:
-	.loc	1 197 26
-	add.s32 	%r61, %r52, %r40;
-	.loc	1 218 9
-	mov.u64 	%rd268, 0;
-	st.shared.u64 	[%r61], %rd268;
-	setp.ne.s32 	%p4, %r3, 0;
-	.loc	1 219 9
-	@%p4 bra 	$L__BB0_10;
-
-	.loc	1 222 13
-	cvt.s64.s32 	%rd47, %r147;
-	.loc	1 222 32
-	.loc	1 149 22, function_name $L__info_string1, inlined_at 1 222 32
-	mov.u64 	%rd48, 32;
-	{ // callseq 0, 0
-	.reg .b32 temp_param_reg;
-	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd48;
-	.param .b64 retval0;
-	call.uni (retval0), 
-	malloc, 
-	(
-	param0
-	);
-	ld.param.b64 	%rd270, [retval0+0];
-	} // callseq 0
-	mov.u32 	%r148, 0;
-	.loc	1 150 18, function_name $L__info_string1, inlined_at 1 222 32
-	ld.global.nc.u64 	%rd50, [%rd49];
-	add.s64 	%rd51, %rd50, %rd47;
-	setp.lt.u64 	%p5, %rd51, %rd50;
-	.loc	1 151 5, function_name $L__info_string1, inlined_at 1 222 32
-	st.u64 	[%rd270], %rd51;
-	.loc	1 154 5, function_name $L__info_string1, inlined_at 1 222 32
-	selp.u64 	%rd52, 1, 0, %p5;
-	.loc	1 156 9, function_name $L__info_string1, inlined_at 1 222 32
-	ld.global.nc.u64 	%rd53, [%rd49+8];
-	add.s64 	%rd54, %rd53, %rd52;
-	setp.lt.u64 	%p6, %rd54, %rd53;
-	.loc	1 157 9, function_name $L__info_string1, inlined_at 1 222 32
-	st.u64 	[%rd270+8], %rd54;
-	.loc	1 154 5, function_name $L__info_string1, inlined_at 1 222 32
-	selp.u64 	%rd55, 1, 0, %p6;
-	.loc	1 156 9, function_name $L__info_string1, inlined_at 1 222 32
-	ld.global.nc.u64 	%rd56, [%rd49+16];
-	add.s64 	%rd57, %rd56, %rd55;
-	setp.lt.u64 	%p7, %rd57, %rd56;
-	.loc	1 157 9, function_name $L__info_string1, inlined_at 1 222 32
-	st.u64 	[%rd270+16], %rd57;
-	.loc	1 154 5, function_name $L__info_string1, inlined_at 1 222 32
-	selp.u64 	%rd58, 1, 0, %p7;
-	.loc	1 156 9, function_name $L__info_string1, inlined_at 1 222 32
-	ld.global.nc.u64 	%rd59, [%rd49+24];
-	add.s64 	%rd60, %rd59, %rd58;
-	.loc	1 157 9, function_name $L__info_string1, inlined_at 1 222 32
-	st.u64 	[%rd270+24], %rd60;
-	.loc	1 219 9
-	cvt.u64.u32 	%rd10, %r52;
-
-$L__BB0_6:
-	.loc	1 0 9
-	add.s64 	%rd61, %rd11, %rd268;
-	ld.global.nc.u8 	%rs3, [%rd61];
-	add.s64 	%rd62, %rd10, %rd268;
-	cvt.u32.u64 	%r66, %rd62;
-	st.shared.u8 	[%r66], %rs3;
-	add.s64 	%rd268, %rd268, 1;
-	add.s32 	%r148, %r148, 1;
-	setp.lt.u32 	%p8, %r148, 32;
-	@%p8 bra 	$L__BB0_6;
-
-	mov.u64 	%rd269, 0;
-
-$L__BB0_8:
-	add.s64 	%rd64, %rd270, %rd269;
-	ld.u8 	%rs4, [%rd64];
-	cvt.u32.u64 	%r68, %rd269;
-	add.s32 	%r69, %r52, %r68;
-	st.shared.u8 	[%r69+32], %rs4;
-	add.s64 	%rd269, %rd269, 1;
-	setp.lt.u64 	%p9, %rd269, 32;
-	@%p9 bra 	$L__BB0_8;
-
-	.loc	1 226 13
-	ld.shared.u64 	%rd65, [%r52+64];
-	xor.b64  	%rd66, %rd65, 1;
-	st.shared.u64 	[%r52+64], %rd66;
-	.loc	1 227 13
-	ld.shared.u64 	%rd67, [%r52+128];
-	xor.b64  	%rd68, %rd67, -9223372036854775808;
-	st.shared.u64 	[%r52+128], %rd68;
-
-$L__BB0_10:
-	.loc	1 197 26
-	add.s32 	%r13, %r39, %r81;
-	add.s32 	%r14, %r39, %r83;
-	add.s32 	%r86, %r51, %r37;
-	add.s32 	%r15, %r86, %r87;
-	add.s32 	%r16, %r43, %r91;
-	add.s32 	%r17, %r39, %r93;
-	add.s32 	%r18, %r39, %r95;
-	add.s32 	%r19, %r39, %r97;
-	add.s32 	%r20, %r86, %r99;
-	mov.u32 	%r149, 0;
-
-$L__BB0_11:
-	.loc	1 230 9
-	.loc	1 118 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd69, [%r7+40];
-	ld.shared.u64 	%rd70, [%r7];
-	xor.b64  	%rd71, %rd69, %rd70;
-	ld.shared.u64 	%rd72, [%r7+80];
-	xor.b64  	%rd73, %rd71, %rd72;
-	ld.shared.u64 	%rd74, [%r7+120];
-	xor.b64  	%rd75, %rd73, %rd74;
-	ld.shared.u64 	%rd76, [%r7+160];
-	xor.b64  	%rd77, %rd75, %rd76;
-	st.shared.u64 	[%r41], %rd77;
-	.loc	1 119 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd78, [%r14];
-	{
-	.reg .b32 %dummy;
-	mov.b64 	{%dummy,%r107}, %rd78;
-	}
-	{
-	.reg .b32 %dummy;
-	mov.b64 	{%r108,%dummy}, %rd78;
-	}
-	shf.l.wrap.b32 	%r109, %r108, %r107, 1;
-	shf.l.wrap.b32 	%r110, %r107, %r108, 1;
-	mov.b64 	%rd79, {%r110, %r109};
-	ld.shared.u64 	%rd80, [%r13];
-	xor.b64  	%rd81, %rd79, %rd80;
-	st.shared.u64 	[%r44], %rd81;
-	.loc	1 120 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd82, [%r16];
-	ld.shared.u64 	%rd83, [%r15];
-	xor.b64  	%rd84, %rd82, %rd83;
-	cvt.u32.u64 	%r114, %rd17;
-	shl.b64 	%rd85, %rd84, %r114;
-	cvt.u32.u64 	%r115, %rd18;
-	shr.u64 	%rd86, %rd84, %r115;
-	xor.b64  	%rd87, %rd86, %rd85;
-	st.shared.u64 	[%r41], %rd87;
-	.loc	1 121 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd88, [%r18];
-	not.b64 	%rd89, %rd88;
-	ld.shared.u64 	%rd90, [%r19];
-	and.b64  	%rd91, %rd90, %rd89;
-	ld.shared.u64 	%rd92, [%r17];
-	xor.b64  	%rd93, %rd91, %rd92;
-	st.shared.u64 	[%r20], %rd93;
-	.loc	1 122 9, function_name $L__info_string2, inlined_at 1 230 9
-	selp.u32 	%r116, 1, 0, %p4;
-	mul.wide.u32 	%rd94, %r116, 192;
-	mov.u64 	%rd95, rc;
-	add.s64 	%rd96, %rd95, %rd94;
-	mul.wide.s32 	%rd97, %r149, 8;
-	add.s64 	%rd98, %rd96, %rd97;
-	add.s32 	%r119, %r86, %r40;
-	ld.shared.u64 	%rd99, [%r119];
-	ld.const.u64 	%rd100, [%rd98];
-	xor.b64  	%rd101, %rd99, %rd100;
-	st.shared.u64 	[%r119], %rd101;
-	.loc	1 118 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd102, [%r7+40];
-	ld.shared.u64 	%rd103, [%r7];
-	xor.b64  	%rd104, %rd102, %rd103;
-	ld.shared.u64 	%rd105, [%r7+80];
-	xor.b64  	%rd106, %rd104, %rd105;
-	ld.shared.u64 	%rd107, [%r7+120];
-	xor.b64  	%rd108, %rd106, %rd107;
-	ld.shared.u64 	%rd109, [%r7+160];
-	xor.b64  	%rd110, %rd108, %rd109;
-	st.shared.u64 	[%r41], %rd110;
-	.loc	1 119 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd111, [%r14];
-	{
-	.reg .b32 %dummy;
-	mov.b64 	{%dummy,%r120}, %rd111;
-	}
-	{
-	.reg .b32 %dummy;
-	mov.b64 	{%r121,%dummy}, %rd111;
-	}
-	shf.l.wrap.b32 	%r122, %r121, %r120, 1;
-	shf.l.wrap.b32 	%r123, %r120, %r121, 1;
-	mov.b64 	%rd112, {%r123, %r122};
-	ld.shared.u64 	%rd113, [%r13];
-	xor.b64  	%rd114, %rd112, %rd113;
-	st.shared.u64 	[%r44], %rd114;
-	.loc	1 120 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd115, [%r16];
-	ld.shared.u64 	%rd116, [%r15];
-	xor.b64  	%rd117, %rd115, %rd116;
-	shl.b64 	%rd118, %rd117, %r114;
-	shr.u64 	%rd119, %rd117, %r115;
-	xor.b64  	%rd120, %rd119, %rd118;
-	st.shared.u64 	[%r41], %rd120;
-	.loc	1 121 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd121, [%r18];
-	not.b64 	%rd122, %rd121;
-	ld.shared.u64 	%rd123, [%r19];
-	and.b64  	%rd124, %rd123, %rd122;
-	ld.shared.u64 	%rd125, [%r17];
-	xor.b64  	%rd126, %rd124, %rd125;
-	st.shared.u64 	[%r20], %rd126;
-	.loc	1 122 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd127, [%r119];
-	ld.const.u64 	%rd128, [%rd98+8];
-	xor.b64  	%rd129, %rd127, %rd128;
-	st.shared.u64 	[%r119], %rd129;
-	.loc	1 118 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd130, [%r7+40];
-	ld.shared.u64 	%rd131, [%r7];
-	xor.b64  	%rd132, %rd130, %rd131;
-	ld.shared.u64 	%rd133, [%r7+80];
-	xor.b64  	%rd134, %rd132, %rd133;
-	ld.shared.u64 	%rd135, [%r7+120];
-	xor.b64  	%rd136, %rd134, %rd135;
-	ld.shared.u64 	%rd137, [%r7+160];
-	xor.b64  	%rd138, %rd136, %rd137;
-	st.shared.u64 	[%r41], %rd138;
-	.loc	1 119 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd139, [%r14];
-	{
-	.reg .b32 %dummy;
-	mov.b64 	{%dummy,%r124}, %rd139;
-	}
-	{
-	.reg .b32 %dummy;
-	mov.b64 	{%r125,%dummy}, %rd139;
-	}
-	shf.l.wrap.b32 	%r126, %r125, %r124, 1;
-	shf.l.wrap.b32 	%r127, %r124, %r125, 1;
-	mov.b64 	%rd140, {%r127, %r126};
-	ld.shared.u64 	%rd141, [%r13];
-	xor.b64  	%rd142, %rd140, %rd141;
-	st.shared.u64 	[%r44], %rd142;
-	.loc	1 120 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd143, [%r16];
-	ld.shared.u64 	%rd144, [%r15];
-	xor.b64  	%rd145, %rd143, %rd144;
-	shl.b64 	%rd146, %rd145, %r114;
-	shr.u64 	%rd147, %rd145, %r115;
-	xor.b64  	%rd148, %rd147, %rd146;
-	st.shared.u64 	[%r41], %rd148;
-	.loc	1 121 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd149, [%r18];
-	not.b64 	%rd150, %rd149;
-	ld.shared.u64 	%rd151, [%r19];
-	and.b64  	%rd152, %rd151, %rd150;
-	ld.shared.u64 	%rd153, [%r17];
-	xor.b64  	%rd154, %rd152, %rd153;
-	st.shared.u64 	[%r20], %rd154;
-	.loc	1 122 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd155, [%r119];
-	ld.const.u64 	%rd156, [%rd98+16];
-	xor.b64  	%rd157, %rd155, %rd156;
-	st.shared.u64 	[%r119], %rd157;
-	.loc	1 118 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd158, [%r7+40];
-	ld.shared.u64 	%rd159, [%r7];
-	xor.b64  	%rd160, %rd158, %rd159;
-	ld.shared.u64 	%rd161, [%r7+80];
-	xor.b64  	%rd162, %rd160, %rd161;
-	ld.shared.u64 	%rd163, [%r7+120];
-	xor.b64  	%rd164, %rd162, %rd163;
-	ld.shared.u64 	%rd165, [%r7+160];
-	xor.b64  	%rd166, %rd164, %rd165;
-	st.shared.u64 	[%r41], %rd166;
-	.loc	1 119 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd167, [%r14];
-	{
-	.reg .b32 %dummy;
-	mov.b64 	{%dummy,%r128}, %rd167;
-	}
-	{
-	.reg .b32 %dummy;
-	mov.b64 	{%r129,%dummy}, %rd167;
-	}
-	shf.l.wrap.b32 	%r130, %r129, %r128, 1;
-	shf.l.wrap.b32 	%r131, %r128, %r129, 1;
-	mov.b64 	%rd168, {%r131, %r130};
-	ld.shared.u64 	%rd169, [%r13];
-	xor.b64  	%rd170, %rd168, %rd169;
-	st.shared.u64 	[%r44], %rd170;
-	.loc	1 120 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd171, [%r16];
-	ld.shared.u64 	%rd172, [%r15];
-	xor.b64  	%rd173, %rd171, %rd172;
-	shl.b64 	%rd174, %rd173, %r114;
-	shr.u64 	%rd175, %rd173, %r115;
-	xor.b64  	%rd176, %rd175, %rd174;
-	st.shared.u64 	[%r41], %rd176;
-	.loc	1 121 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd177, [%r18];
-	not.b64 	%rd178, %rd177;
-	ld.shared.u64 	%rd179, [%r19];
-	and.b64  	%rd180, %rd179, %rd178;
-	ld.shared.u64 	%rd181, [%r17];
-	xor.b64  	%rd182, %rd180, %rd181;
-	st.shared.u64 	[%r20], %rd182;
-	.loc	1 122 9, function_name $L__info_string2, inlined_at 1 230 9
-	ld.shared.u64 	%rd183, [%r119];
-	ld.const.u64 	%rd184, [%rd98+24];
-	xor.b64  	%rd185, %rd183, %rd184;
-	st.shared.u64 	[%r119], %rd185;
-	.loc	1 116 29, function_name $L__info_string2, inlined_at 1 230 9
-	add.s32 	%r149, %r149, 4;
-	.loc	1 116 5, function_name $L__info_string2, inlined_at 1 230 9
-	setp.ne.s32 	%p11, %r149, 24;
-	@%p11 bra 	$L__BB0_11;
-
-	.loc	1 232 9
-	@%p4 bra 	$L__BB0_24;
-
-	.loc	1 240 17
-	ld.shared.v4.u16 	{%rs6, %rs7, %rs8, %rs9}, [%r52+16];
-	shr.u16 	%rs11, %rs6, 8;
-	shr.u16 	%rs13, %rs7, 8;
-	shr.u16 	%rs15, %rs8, 8;
-	shr.u16 	%rs17, %rs9, 8;
-	cvt.u64.u16 	%rd186, %rs17;
-	cvt.u64.u16 	%rd187, %rs9;
-	bfi.b64 	%rd188, %rd187, %rd186, 8, 8;
-	cvt.u32.u16 	%r135, %rs15;
-	mul.wide.u32 	%rd189, %r135, 65536;
-	or.b64  	%rd190, %rd188, %rd189;
-	cvt.u32.u16 	%r136, %rs8;
-	and.b32  	%r137, %r136, 255;
-	mul.wide.u32 	%rd191, %r137, 16777216;
-	or.b64  	%rd192, %rd190, %rd191;
-	cvt.u64.u16 	%rd193, %rs13;
-	shl.b64 	%rd194, %rd193, 32;
-	cvt.u64.u16 	%rd195, %rs7;
-	shl.b64 	%rd196, %rd195, 40;
-	and.b64  	%rd197, %rd196, 280375465082880;
-	cvt.u64.u16 	%rd198, %rs11;
-	shl.b64 	%rd199, %rd198, 48;
-	cvt.u64.u16 	%rd200, %rs6;
-	shl.b64 	%rd201, %rd200, 56;
-	or.b64  	%rd202, %rd192, %rd194;
-	or.b64  	%rd203, %rd202, %rd197;
-	or.b64  	%rd204, %rd203, %rd199;
-	or.b64  	%rd19, %rd204, %rd201;
-	ld.shared.v4.u16 	{%rs18, %rs19, %rs20, %rs21}, [%r52+8];
-	shr.u16 	%rs23, %rs18, 8;
-	shr.u16 	%rs25, %rs19, 8;
-	shr.u16 	%rs27, %rs20, 8;
-	shr.u16 	%rs29, %rs21, 8;
-	cvt.u64.u16 	%rd205, %rs29;
-	cvt.u64.u16 	%rd206, %rs21;
-	bfi.b64 	%rd207, %rd206, %rd205, 8, 8;
-	cvt.u32.u16 	%r138, %rs27;
-	mul.wide.u32 	%rd208, %r138, 65536;
-	or.b64  	%rd209, %rd207, %rd208;
-	cvt.u32.u16 	%r139, %rs20;
-	and.b32  	%r140, %r139, 255;
-	mul.wide.u32 	%rd210, %r140, 16777216;
-	or.b64  	%rd211, %rd209, %rd210;
-	cvt.u64.u16 	%rd212, %rs25;
-	shl.b64 	%rd213, %rd212, 32;
-	cvt.u64.u16 	%rd214, %rs19;
-	shl.b64 	%rd215, %rd214, 40;
-	and.b64  	%rd216, %rd215, 280375465082880;
-	cvt.u64.u16 	%rd217, %rs23;
-	shl.b64 	%rd218, %rd217, 48;
-	cvt.u64.u16 	%rd219, %rs18;
-	shl.b64 	%rd220, %rd219, 56;
-	or.b64  	%rd221, %rd211, %rd213;
-	or.b64  	%rd222, %rd221, %rd216;
-	or.b64  	%rd223, %rd222, %rd218;
-	or.b64  	%rd20, %rd223, %rd220;
-	ld.shared.v4.u16 	{%rs30, %rs31, %rs32, %rs33}, [%r52];
-	shr.u16 	%rs35, %rs30, 8;
-	shr.u16 	%rs37, %rs31, 8;
-	shr.u16 	%rs39, %rs32, 8;
-	shr.u16 	%rs41, %rs33, 8;
-	cvt.u64.u16 	%rd224, %rs41;
-	cvt.u64.u16 	%rd225, %rs33;
-	bfi.b64 	%rd226, %rd225, %rd224, 8, 8;
-	cvt.u32.u16 	%r141, %rs39;
-	mul.wide.u32 	%rd227, %r141, 65536;
-	or.b64  	%rd228, %rd226, %rd227;
-	cvt.u32.u16 	%r142, %rs32;
-	and.b32  	%r143, %r142, 255;
-	mul.wide.u32 	%rd229, %r143, 16777216;
-	or.b64  	%rd230, %rd228, %rd229;
-	cvt.u64.u16 	%rd231, %rs37;
-	shl.b64 	%rd232, %rd231, 32;
-	cvt.u64.u16 	%rd233, %rs31;
-	shl.b64 	%rd234, %rd233, 40;
-	and.b64  	%rd235, %rd234, 280375465082880;
-	cvt.u64.u16 	%rd236, %rs35;
-	shl.b64 	%rd237, %rd236, 48;
-	cvt.u64.u16 	%rd238, %rs30;
-	shl.b64 	%rd239, %rd238, 56;
-	or.b64  	%rd240, %rd230, %rd232;
-	or.b64  	%rd241, %rd240, %rd235;
-	or.b64  	%rd242, %rd241, %rd237;
-	or.b64  	%rd21, %rd242, %rd239;
-	.loc	1 243 17
-	.loc	1 128 5, function_name $L__info_string3, inlined_at 1 243 17
-	ld.global.nc.u64 	%rd23, [%rd22+24];
-	setp.gt.u64 	%p13, %rd21, %rd23;
-	mov.u16 	%rs5, 0;
-	mov.u16 	%rs60, %rs5;
-	@%p13 bra 	$L__BB0_20;
-
-	.loc	1 130 5, function_name $L__info_string3, inlined_at 1 243 17
-	setp.lt.u64 	%p14, %rd21, %rd23;
-	mov.u16 	%rs42, 1;
-	mov.u16 	%rs60, %rs42;
-	@%p14 bra 	$L__BB0_20;
-
-	.loc	1 132 5, function_name $L__info_string3, inlined_at 1 243 17
-	ld.global.nc.u64 	%rd24, [%rd22+16];
-	setp.gt.u64 	%p15, %rd20, %rd24;
-	mov.u16 	%rs60, %rs5;
-	@%p15 bra 	$L__BB0_20;
-
-	.loc	1 134 5, function_name $L__info_string3, inlined_at 1 243 17
-	setp.lt.u64 	%p16, %rd20, %rd24;
-	mov.u16 	%rs60, %rs42;
-	@%p16 bra 	$L__BB0_20;
-
-	.loc	1 137 5, function_name $L__info_string3, inlined_at 1 243 17
-	ld.global.nc.u64 	%rd25, [%rd22+8];
-	setp.gt.u64 	%p17, %rd19, %rd25;
-	mov.u16 	%rs60, %rs5;
-	@%p17 bra 	$L__BB0_20;
-
-	.loc	1 139 5, function_name $L__info_string3, inlined_at 1 243 17
-	setp.lt.u64 	%p18, %rd19, %rd25;
-	mov.u16 	%rs60, %rs42;
-	@%p18 bra 	$L__BB0_20;
-
-	.loc	1 240 17
-	ld.shared.v4.u16 	{%rs47, %rs48, %rs49, %rs50}, [%r52+24];
-	.loc	1 141 5, function_name $L__info_string3, inlined_at 1 243 17
-	ld.global.nc.u64 	%rd243, [%rd22];
-	.loc	1 240 17
-	cvt.u64.u16 	%rd244, %rs47;
-	shl.b64 	%rd245, %rd244, 56;
-	shr.u16 	%rs52, %rs47, 8;
-	cvt.u64.u16 	%rd246, %rs52;
-	shl.b64 	%rd247, %rd246, 48;
-	cvt.u64.u16 	%rd248, %rs48;
-	shl.b64 	%rd249, %rd248, 40;
-	and.b64  	%rd250, %rd249, 280375465082880;
-	shr.u16 	%rs55, %rs50, 8;
-	cvt.u64.u16 	%rd251, %rs55;
-	cvt.u64.u16 	%rd252, %rs50;
-	bfi.b64 	%rd253, %rd252, %rd251, 8, 8;
-	shr.u16 	%rs57, %rs49, 8;
-	cvt.u32.u16 	%r144, %rs57;
-	mul.wide.u32 	%rd254, %r144, 65536;
-	or.b64  	%rd255, %rd253, %rd254;
-	cvt.u32.u16 	%r145, %rs49;
-	and.b32  	%r146, %r145, 255;
-	mul.wide.u32 	%rd256, %r146, 16777216;
-	or.b64  	%rd257, %rd255, %rd256;
-	shr.u16 	%rs58, %rs48, 8;
-	cvt.u64.u16 	%rd258, %rs58;
-	shl.b64 	%rd259, %rd258, 32;
-	or.b64  	%rd260, %rd257, %rd259;
-	or.b64  	%rd261, %rd260, %rd250;
-	or.b64  	%rd262, %rd261, %rd247;
-	or.b64  	%rd263, %rd262, %rd245;
-	.loc	1 141 5, function_name $L__info_string3, inlined_at 1 243 17
-	setp.le.u64 	%p19, %rd263, %rd243;
-	.loc	1 142 9, function_name $L__info_string3, inlined_at 1 243 17
-	selp.u16 	%rs60, 1, 0, %p19;
-
-$L__BB0_20:
-	.loc	1 243 17
-	setp.eq.s16 	%p20, %rs60, 0;
-	@%p20 bra 	$L__BB0_23;
-
-	.loc	1 0 17
-	mov.u64 	%rd271, 0;
-
-$L__BB0_22:
-	add.s64 	%rd265, %rd270, %rd271;
-	ld.u8 	%rs59, [%rd265];
-	add.s64 	%rd266, %rd26, %rd271;
-	st.global.u8 	[%rd266], %rs59;
-	add.s64 	%rd271, %rd271, 1;
-	setp.lt.u64 	%p21, %rd271, 32;
-	@%p21 bra 	$L__BB0_22;
-
-$L__BB0_23:
-	.loc	1 248 13
-	{ // callseq 1, 0
-	.reg .b32 temp_param_reg;
-	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd270;
-	call.uni 
-	free, 
-	(
-	param0
-	);
-	} // callseq 1
-
-$L__BB0_24:
-	.loc	1 213 42
-	add.s32 	%r147, %r147, 1;
-	.loc	1 213 5
-	setp.lt.s32 	%p22, %r147, %r6;
-	@%p22 bra 	$L__BB0_4;
-
-$L__BB0_25:
-	.loc	1 251 1
-	ret;
-
-}
-	// .globl	kernel_lilypad_pow_debug
 .visible .entry kernel_lilypad_pow_debug(
 	.param .u64 kernel_lilypad_pow_debug_param_0,
 	.param .u64 kernel_lilypad_pow_debug_param_1,
@@ -694,641 +45,2014 @@ $L__BB0_25:
 	.param .u64 kernel_lilypad_pow_debug_param_6,
 	.param .u64 kernel_lilypad_pow_debug_param_7
 )
-.maxntid 1536, 1, 1
+.maxntid 1024, 1, 1
 {
-	.reg .pred 	%p<23>;
-	.reg .b16 	%rs<61>;
-	.reg .b32 	%r<150>;
-	.reg .b64 	%rd<272>;
-	.loc	1 256 0
+	.local .align 8 .b8 	__local_depot0[8];
+	.reg .b64 	%SP;
+	.reg .b64 	%SPL;
+	.reg .pred 	%p<22>;
+	.reg .b16 	%rs<543>;
+	.reg .b32 	%r<217>;
+	.reg .b64 	%rd<941>;
+	.loc	1 147 0
 	// demoted variable
 	.shared .align 8 .b8 _ZZ24kernel_lilypad_pow_debugE12stateInBlock[6400];
 	// demoted variable
 	.shared .align 8 .b8 _ZZ24kernel_lilypad_pow_debugE8cInBlock[6400];
-	// demoted variable
-	.shared .align 8 .b8 _ZZ24kernel_lilypad_pow_debugE8dInBlock[6400];
 
-	ld.param.u64 	%rd29, [kernel_lilypad_pow_debug_param_0];
-	ld.param.u64 	%rd30, [kernel_lilypad_pow_debug_param_1];
-	ld.param.u64 	%rd31, [kernel_lilypad_pow_debug_param_2];
-	ld.param.u32 	%r26, [kernel_lilypad_pow_debug_param_3];
-	ld.param.u32 	%r25, [kernel_lilypad_pow_debug_param_4];
-	ld.param.u64 	%rd32, [kernel_lilypad_pow_debug_param_5];
-	.loc	1 263 16
-	mov.u32 	%r27, %ctaid.x;
-	mov.u32 	%r28, %ntid.x;
+	mov.u64 	%SPL, __local_depot0;
+	cvta.local.u64 	%SP, %SPL;
+	ld.param.u64 	%rd43, [kernel_lilypad_pow_debug_param_0];
+	ld.param.u64 	%rd44, [kernel_lilypad_pow_debug_param_1];
+	ld.param.u32 	%r15, [kernel_lilypad_pow_debug_param_3];
+	ld.param.u32 	%r14, [kernel_lilypad_pow_debug_param_4];
+	ld.param.u64 	%rd46, [kernel_lilypad_pow_debug_param_5];
+	ld.param.u64 	%rd47, [kernel_lilypad_pow_debug_param_6];
+	ld.param.u64 	%rd48, [kernel_lilypad_pow_debug_param_7];
+	.loc	1 154 16
+	mov.u32 	%r16, %ntid.x;
+	mov.u32 	%r17, %ctaid.x;
 	mov.u32 	%r1, %tid.x;
-	mad.lo.s32 	%r2, %r27, %r28, %r1;
-	.loc	1 264 5
-	setp.ge.u32 	%p1, %r2, %r26;
-	@%p1 bra 	$L__BB1_25;
+	mad.lo.s32 	%r2, %r17, %r16, %r1;
+	.loc	1 155 5
+	setp.ge.u32 	%p1, %r2, %r15;
+	@%p1 bra 	$L__BB0_23;
 
-	.loc	1 270 27
-	shr.s32 	%r29, %r2, 31;
-	shr.u32 	%r30, %r29, 27;
-	add.s32 	%r31, %r2, %r30;
-	and.b32  	%r32, %r31, -32;
-	sub.s32 	%r3, %r2, %r32;
-	.loc	1 271 5
+	.loc	1 161 27
+	shr.s32 	%r18, %r2, 31;
+	shr.u32 	%r19, %r18, 27;
+	add.s32 	%r20, %r2, %r19;
+	and.b32  	%r21, %r20, -32;
+	sub.s32 	%r3, %r2, %r21;
+	.loc	1 162 5
 	setp.gt.s32 	%p2, %r3, 24;
-	@%p2 bra 	$L__BB1_25;
+	@%p2 bra 	$L__BB0_23;
 
-	.loc	1 269 25
-	shr.s32 	%r36, %r31, 5;
-	.loc	1 276 26
-	shr.u32 	%r4, %r1, 5;
-	.loc	1 288 5
-	mul.lo.s32 	%r37, %r4, 200;
-	mov.u32 	%r38, _ZZ24kernel_lilypad_pow_debugE8cInBlock;
-	add.s32 	%r39, %r38, %r37;
-	shl.b32 	%r40, %r3, 3;
-	add.s32 	%r41, %r39, %r40;
-	mov.u64 	%rd33, 0;
-	st.shared.u64 	[%r41], %rd33;
-	.loc	1 289 5
-	mov.u32 	%r42, _ZZ24kernel_lilypad_pow_debugE8dInBlock;
-	add.s32 	%r43, %r42, %r37;
-	add.s32 	%r44, %r43, %r40;
-	st.shared.u64 	[%r44], %rd33;
-	.loc	1 292 5
-	.loc	2 110 3, function_name $L__info_string0, inlined_at 1 292 5
+	.loc	1 160 25
+	shr.s32 	%r25, %r20, 5;
+	.loc	1 167 26
+	shr.u32 	%r26, %r1, 5;
+	.loc	1 177 5
+	mov.u32 	%r27, _ZZ24kernel_lilypad_pow_debugE8cInBlock;
+	mad.lo.s32 	%r28, %r26, 200, %r27;
+	shl.b32 	%r29, %r3, 3;
+	add.s32 	%r30, %r28, %r29;
+	mov.u64 	%rd49, 0;
+	st.shared.u64 	[%r30], %rd49;
+	.loc	1 180 5
+	.loc	2 110 3, function_name $L__info_string0, inlined_at 1 180 5
 	bar.warp.sync 	-1;
-	.loc	1 293 21
-	mul.lo.s32 	%r147, %r36, %r25;
-	.loc	1 294 24
-	add.s32 	%r6, %r147, %r25;
-	.loc	1 295 5
-	setp.ge.s32 	%p3, %r147, %r6;
-	@%p3 bra 	$L__BB1_25;
+	.loc	1 181 21
+	mul.lo.s32 	%r215, %r25, %r14;
+	.loc	1 182 24
+	add.s32 	%r5, %r215, %r14;
+	.loc	1 183 5
+	setp.ge.s32 	%p3, %r215, %r5;
+	@%p3 bra 	$L__BB0_23;
 
 	.loc	1 0 5
-	mul.hi.s32 	%r45, %r3, 1717986919;
-	shr.u32 	%r46, %r45, 31;
-	shr.s32 	%r47, %r45, 1;
-	add.s32 	%r48, %r47, %r46;
-	mul.lo.s32 	%r49, %r48, 5;
-	sub.s32 	%r50, %r3, %r49;
-	mov.u32 	%r51, _ZZ24kernel_lilypad_pow_debugE12stateInBlock;
-	mad.lo.s32 	%r52, %r4, 200, %r51;
-	shl.b32 	%r53, %r50, 3;
-	add.s32 	%r7, %r52, %r53;
-	add.s32 	%r54, %r50, 5;
-	add.s32 	%r55, %r50, 20;
-	mul.wide.s32 	%rd35, %r55, 4;
-	mov.u64 	%rd36, b;
-	add.s64 	%rd1, %rd36, %rd35;
-	mul.wide.s32 	%rd37, %r54, 4;
-	add.s64 	%rd2, %rd36, %rd37;
-	mul.wide.s32 	%rd38, %r3, 4;
-	mov.u64 	%rd39, a;
-	add.s64 	%rd3, %rd39, %rd38;
-	add.s64 	%rd4, %rd36, %rd38;
-	mul.wide.s32 	%rd40, %r3, 8;
-	mov.u64 	%rd41, ro;
-	add.s64 	%rd5, %rd41, %rd40;
-	mul.wide.s32 	%rd42, %r3, 12;
-	mov.u64 	%rd43, c;
-	add.s64 	%rd6, %rd43, %rd42;
-	mov.u64 	%rd44, d;
-	add.s64 	%rd7, %rd44, %rd38;
-	cvta.to.global.u64 	%rd49, %rd30;
-	cvta.to.global.u64 	%rd11, %rd29;
-	ld.const.u32 	%r77, [%rd1];
-	shl.b32 	%r81, %r77, 3;
-	ld.const.u32 	%r82, [%rd2];
-	shl.b32 	%r83, %r82, 3;
-	ld.const.u32 	%r84, [%rd3];
-	shl.b32 	%r87, %r84, 3;
-	ld.const.u32 	%r88, [%rd4];
-	shl.b32 	%r91, %r88, 3;
-	ld.const.u32 	%rd17, [%rd5];
-	ld.const.u32 	%rd18, [%rd5+4];
-	ld.const.u32 	%r92, [%rd6];
-	shl.b32 	%r93, %r92, 3;
-	ld.const.u32 	%r94, [%rd6+4];
-	shl.b32 	%r95, %r94, 3;
-	ld.const.u32 	%r96, [%rd6+8];
-	shl.b32 	%r97, %r96, 3;
-	ld.const.u32 	%r98, [%rd7];
-	shl.b32 	%r99, %r98, 3;
-	cvta.to.global.u64 	%rd22, %rd31;
-	cvta.to.global.u64 	%rd26, %rd32;
+	setp.eq.s32 	%p4, %r3, 0;
+	mul.hi.s32 	%r31, %r3, 1717986919;
+	shr.u32 	%r32, %r31, 31;
+	shr.s32 	%r33, %r31, 1;
+	add.s32 	%r34, %r33, %r32;
+	mul.lo.s32 	%r35, %r34, 5;
+	sub.s32 	%r6, %r3, %r35;
+	mul.wide.s32 	%rd51, %r3, 2;
+	mov.u64 	%rd52, g_ppi_aux;
+	add.s64 	%rd1, %rd52, %rd51;
+	mov.u64 	%rd53, g_ksi_aux;
+	add.s64 	%rd2, %rd53, %rd51;
+	ld.const.u64 	%rd54, [g_iota_aux];
+	selp.b64 	%rd3, %rd54, 0, %p4;
+	ld.const.u64 	%rd55, [g_iota_aux+8];
+	selp.b64 	%rd4, %rd55, 0, %p4;
+	ld.const.u64 	%rd56, [g_iota_aux+16];
+	selp.b64 	%rd5, %rd56, 0, %p4;
+	ld.const.u64 	%rd57, [g_iota_aux+24];
+	selp.b64 	%rd6, %rd57, 0, %p4;
+	ld.const.u64 	%rd58, [g_iota_aux+32];
+	selp.b64 	%rd7, %rd58, 0, %p4;
+	ld.const.u64 	%rd59, [g_iota_aux+40];
+	selp.b64 	%rd8, %rd59, 0, %p4;
+	ld.const.u64 	%rd60, [g_iota_aux+48];
+	selp.b64 	%rd9, %rd60, 0, %p4;
+	ld.const.u64 	%rd61, [g_iota_aux+56];
+	selp.b64 	%rd10, %rd61, 0, %p4;
+	ld.const.u64 	%rd62, [g_iota_aux+64];
+	selp.b64 	%rd11, %rd62, 0, %p4;
+	ld.const.u64 	%rd63, [g_iota_aux+72];
+	selp.b64 	%rd12, %rd63, 0, %p4;
+	ld.const.u64 	%rd64, [g_iota_aux+80];
+	selp.b64 	%rd13, %rd64, 0, %p4;
+	ld.const.u64 	%rd65, [g_iota_aux+88];
+	selp.b64 	%rd14, %rd65, 0, %p4;
+	ld.const.u64 	%rd66, [g_iota_aux+96];
+	selp.b64 	%rd15, %rd66, 0, %p4;
+	ld.const.u64 	%rd67, [g_iota_aux+104];
+	selp.b64 	%rd16, %rd67, 0, %p4;
+	ld.const.u64 	%rd68, [g_iota_aux+112];
+	selp.b64 	%rd17, %rd68, 0, %p4;
+	ld.const.u64 	%rd69, [g_iota_aux+120];
+	selp.b64 	%rd18, %rd69, 0, %p4;
+	ld.const.u64 	%rd70, [g_iota_aux+128];
+	selp.b64 	%rd19, %rd70, 0, %p4;
+	ld.const.u64 	%rd71, [g_iota_aux+136];
+	selp.b64 	%rd20, %rd71, 0, %p4;
+	ld.const.u64 	%rd72, [g_iota_aux+144];
+	selp.b64 	%rd21, %rd72, 0, %p4;
+	ld.const.u64 	%rd73, [g_iota_aux+152];
+	selp.b64 	%rd22, %rd73, 0, %p4;
+	ld.const.u64 	%rd74, [g_iota_aux+160];
+	selp.b64 	%rd23, %rd74, 0, %p4;
+	ld.const.u64 	%rd75, [g_iota_aux+168];
+	selp.b64 	%rd24, %rd75, 0, %p4;
+	ld.const.u64 	%rd76, [g_iota_aux+176];
+	selp.b64 	%rd25, %rd76, 0, %p4;
+	ld.const.u64 	%rd77, [g_iota_aux+184];
+	selp.b64 	%rd26, %rd77, 0, %p4;
+	cvta.to.global.u64 	%rd82, %rd44;
+	cvta.to.global.u64 	%rd29, %rd43;
+	shl.b32 	%r58, %r6, 3;
+	ld.const.u8 	%rs343, [%rd1];
+	ld.const.u8 	%rs344, [%rd1+1];
+	ld.const.u8 	%rs345, [%rd2];
+	ld.const.u8 	%rs346, [%rd2+1];
+	cvta.to.global.u64 	%rd810, %rd47;
+	cvta.to.global.u64 	%rd924, %rd48;
+	cvta.to.global.u64 	%rd40, %rd46;
 
-$L__BB1_4:
-	.loc	1 276 26
-	add.s32 	%r61, %r52, %r40;
-	.loc	1 300 9
-	mov.u64 	%rd268, 0;
-	st.shared.u64 	[%r61], %rd268;
-	setp.ne.s32 	%p4, %r3, 0;
-	.loc	1 301 9
-	@%p4 bra 	$L__BB1_10;
+$L__BB0_4:
+	.loc	1 167 26
+	mov.u32 	%r38, _ZZ24kernel_lilypad_pow_debugE12stateInBlock;
+	mad.lo.s32 	%r8, %r26, 200, %r38;
+	add.s32 	%r40, %r8, %r29;
+	.loc	1 188 9
+	mov.u64 	%rd937, 0;
+	st.shared.u64 	[%r40], %rd937;
+	setp.ne.s32 	%p5, %r3, 0;
+	.loc	1 189 9
+	@%p5 bra 	$L__BB0_10;
 
-	.loc	1 304 13
-	cvt.s64.s32 	%rd47, %r147;
-	.loc	1 304 32
-	.loc	1 149 22, function_name $L__info_string1, inlined_at 1 304 32
-	mov.u64 	%rd48, 32;
-	{ // callseq 2, 0
+	.loc	1 192 13
+	cvt.s64.s32 	%rd80, %r215;
+	.loc	1 192 32
+	.loc	1 115 22, function_name $L__info_string1, inlined_at 1 192 32
+	mov.u64 	%rd81, 32;
+	{ // callseq 0, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd48;
+	st.param.b64 	[param0+0], %rd81;
 	.param .b64 retval0;
 	call.uni (retval0), 
 	malloc, 
 	(
 	param0
 	);
-	ld.param.b64 	%rd270, [retval0+0];
-	} // callseq 2
-	mov.u32 	%r148, 0;
-	.loc	1 150 18, function_name $L__info_string1, inlined_at 1 304 32
-	ld.global.nc.u64 	%rd50, [%rd49];
-	add.s64 	%rd51, %rd50, %rd47;
-	setp.lt.u64 	%p5, %rd51, %rd50;
-	.loc	1 151 5, function_name $L__info_string1, inlined_at 1 304 32
-	st.u64 	[%rd270], %rd51;
-	.loc	1 154 5, function_name $L__info_string1, inlined_at 1 304 32
-	selp.u64 	%rd52, 1, 0, %p5;
-	.loc	1 156 9, function_name $L__info_string1, inlined_at 1 304 32
-	ld.global.nc.u64 	%rd53, [%rd49+8];
-	add.s64 	%rd54, %rd53, %rd52;
-	setp.lt.u64 	%p6, %rd54, %rd53;
-	.loc	1 157 9, function_name $L__info_string1, inlined_at 1 304 32
-	st.u64 	[%rd270+8], %rd54;
-	.loc	1 154 5, function_name $L__info_string1, inlined_at 1 304 32
-	selp.u64 	%rd55, 1, 0, %p6;
-	.loc	1 156 9, function_name $L__info_string1, inlined_at 1 304 32
-	ld.global.nc.u64 	%rd56, [%rd49+16];
-	add.s64 	%rd57, %rd56, %rd55;
-	setp.lt.u64 	%p7, %rd57, %rd56;
-	.loc	1 157 9, function_name $L__info_string1, inlined_at 1 304 32
-	st.u64 	[%rd270+16], %rd57;
-	.loc	1 154 5, function_name $L__info_string1, inlined_at 1 304 32
-	selp.u64 	%rd58, 1, 0, %p7;
-	.loc	1 156 9, function_name $L__info_string1, inlined_at 1 304 32
-	ld.global.nc.u64 	%rd59, [%rd49+24];
-	add.s64 	%rd60, %rd59, %rd58;
-	.loc	1 157 9, function_name $L__info_string1, inlined_at 1 304 32
-	st.u64 	[%rd270+24], %rd60;
-	.loc	1 301 9
-	cvt.u64.u32 	%rd10, %r52;
+	ld.param.b64 	%rd939, [retval0+0];
+	} // callseq 0
+	mov.u32 	%r216, 0;
+	.loc	1 116 18, function_name $L__info_string1, inlined_at 1 192 32
+	ld.global.nc.u64 	%rd83, [%rd82];
+	add.s64 	%rd84, %rd83, %rd80;
+	setp.lt.u64 	%p6, %rd84, %rd83;
+	.loc	1 117 5, function_name $L__info_string1, inlined_at 1 192 32
+	st.u64 	[%rd939], %rd84;
+	.loc	1 120 5, function_name $L__info_string1, inlined_at 1 192 32
+	selp.u64 	%rd85, 1, 0, %p6;
+	.loc	1 122 9, function_name $L__info_string1, inlined_at 1 192 32
+	ld.global.nc.u64 	%rd86, [%rd82+8];
+	add.s64 	%rd87, %rd86, %rd85;
+	setp.lt.u64 	%p7, %rd87, %rd86;
+	.loc	1 123 9, function_name $L__info_string1, inlined_at 1 192 32
+	st.u64 	[%rd939+8], %rd87;
+	.loc	1 120 5, function_name $L__info_string1, inlined_at 1 192 32
+	selp.u64 	%rd88, 1, 0, %p7;
+	.loc	1 122 9, function_name $L__info_string1, inlined_at 1 192 32
+	ld.global.nc.u64 	%rd89, [%rd82+16];
+	add.s64 	%rd90, %rd89, %rd88;
+	setp.lt.u64 	%p8, %rd90, %rd89;
+	.loc	1 123 9, function_name $L__info_string1, inlined_at 1 192 32
+	st.u64 	[%rd939+16], %rd90;
+	.loc	1 120 5, function_name $L__info_string1, inlined_at 1 192 32
+	selp.u64 	%rd91, 1, 0, %p8;
+	.loc	1 122 9, function_name $L__info_string1, inlined_at 1 192 32
+	ld.global.nc.u64 	%rd92, [%rd82+24];
+	add.s64 	%rd93, %rd92, %rd91;
+	.loc	1 123 9, function_name $L__info_string1, inlined_at 1 192 32
+	st.u64 	[%rd939+24], %rd93;
 
-$L__BB1_6:
+$L__BB0_6:
 	.loc	1 0 9
-	add.s64 	%rd61, %rd11, %rd268;
-	ld.global.nc.u8 	%rs3, [%rd61];
-	add.s64 	%rd62, %rd10, %rd268;
-	cvt.u32.u64 	%r66, %rd62;
-	st.shared.u8 	[%r66], %rs3;
-	add.s64 	%rd268, %rd268, 1;
-	add.s32 	%r148, %r148, 1;
-	setp.lt.u32 	%p8, %r148, 32;
-	@%p8 bra 	$L__BB1_6;
+	add.s64 	%rd94, %rd29, %rd937;
+	ld.global.nc.u8 	%rs341, [%rd94];
+	cvt.u32.u64 	%r45, %rd937;
+	add.s32 	%r46, %r8, %r45;
+	st.shared.u8 	[%r46], %rs341;
+	add.s64 	%rd937, %rd937, 1;
+	add.s32 	%r216, %r216, 1;
+	setp.lt.u32 	%p9, %r216, 32;
+	@%p9 bra 	$L__BB0_6;
 
-	mov.u64 	%rd269, 0;
+	mov.u64 	%rd938, 0;
 
-$L__BB1_8:
-	add.s64 	%rd64, %rd270, %rd269;
-	ld.u8 	%rs4, [%rd64];
-	cvt.u32.u64 	%r68, %rd269;
-	add.s32 	%r69, %r52, %r68;
-	st.shared.u8 	[%r69+32], %rs4;
-	add.s64 	%rd269, %rd269, 1;
-	setp.lt.u64 	%p9, %rd269, 32;
-	@%p9 bra 	$L__BB1_8;
+$L__BB0_8:
+	add.s64 	%rd96, %rd939, %rd938;
+	ld.u8 	%rs342, [%rd96];
+	cvt.u32.u64 	%r50, %rd938;
+	add.s32 	%r51, %r8, %r50;
+	st.shared.u8 	[%r51+32], %rs342;
+	add.s64 	%rd938, %rd938, 1;
+	setp.lt.u64 	%p10, %rd938, 32;
+	@%p10 bra 	$L__BB0_8;
 
-	.loc	1 310 13
-	ld.shared.u64 	%rd65, [%r52+64];
-	xor.b64  	%rd66, %rd65, 1;
-	st.shared.u64 	[%r52+64], %rd66;
-	.loc	1 311 13
-	ld.shared.u64 	%rd67, [%r52+128];
-	xor.b64  	%rd68, %rd67, -9223372036854775808;
-	st.shared.u64 	[%r52+128], %rd68;
+	.loc	1 196 11
+	ld.shared.u8 	%rs541, [%r8+63];
+	ld.shared.u8 	%rs540, [%r8+62];
+	ld.shared.u8 	%rs539, [%r8+61];
+	ld.shared.u8 	%rs538, [%r8+60];
+	ld.shared.u8 	%rs537, [%r8+59];
+	ld.shared.u8 	%rs536, [%r8+58];
+	ld.shared.u8 	%rs535, [%r8+57];
+	ld.shared.u8 	%rs534, [%r8+56];
+	ld.shared.u8 	%rs533, [%r8+55];
+	ld.shared.u8 	%rs532, [%r8+54];
+	ld.shared.u8 	%rs531, [%r8+53];
+	ld.shared.u8 	%rs530, [%r8+52];
+	ld.shared.u8 	%rs529, [%r8+51];
+	ld.shared.u8 	%rs528, [%r8+50];
+	ld.shared.u8 	%rs527, [%r8+49];
+	ld.shared.u8 	%rs526, [%r8+48];
+	ld.shared.u8 	%rs525, [%r8+47];
+	ld.shared.u8 	%rs524, [%r8+46];
+	ld.shared.u8 	%rs523, [%r8+45];
+	ld.shared.u8 	%rs522, [%r8+44];
+	ld.shared.u8 	%rs521, [%r8+43];
+	ld.shared.u8 	%rs520, [%r8+42];
+	ld.shared.u8 	%rs519, [%r8+41];
+	ld.shared.u8 	%rs518, [%r8+40];
+	ld.shared.u8 	%rs517, [%r8+39];
+	ld.shared.u8 	%rs516, [%r8+38];
+	ld.shared.u8 	%rs515, [%r8+37];
+	ld.shared.u8 	%rs514, [%r8+36];
+	ld.shared.u8 	%rs513, [%r8+35];
+	ld.shared.u8 	%rs512, [%r8+34];
+	ld.shared.u8 	%rs511, [%r8+33];
+	ld.shared.u8 	%rs510, [%r8+32];
+	ld.shared.u8 	%rs509, [%r8+31];
+	ld.shared.u8 	%rs508, [%r8+30];
+	ld.shared.u8 	%rs507, [%r8+29];
+	ld.shared.u8 	%rs506, [%r8+28];
+	ld.shared.u8 	%rs505, [%r8+27];
+	ld.shared.u8 	%rs504, [%r8+26];
+	ld.shared.u8 	%rs503, [%r8+25];
+	ld.shared.u8 	%rs502, [%r8+24];
+	ld.shared.u8 	%rs501, [%r8+23];
+	ld.shared.u8 	%rs500, [%r8+22];
+	ld.shared.u8 	%rs499, [%r8+21];
+	ld.shared.u8 	%rs498, [%r8+20];
+	ld.shared.u8 	%rs497, [%r8+19];
+	ld.shared.u8 	%rs496, [%r8+18];
+	ld.shared.u8 	%rs495, [%r8+17];
+	ld.shared.u8 	%rs494, [%r8+16];
+	ld.shared.u8 	%rs493, [%r8+15];
+	ld.shared.u8 	%rs492, [%r8+14];
+	ld.shared.u8 	%rs491, [%r8+13];
+	ld.shared.u8 	%rs490, [%r8+12];
+	ld.shared.u8 	%rs489, [%r8+11];
+	ld.shared.u8 	%rs488, [%r8+10];
+	ld.shared.u8 	%rs487, [%r8+9];
+	ld.shared.u8 	%rs486, [%r8+8];
+	ld.shared.u8 	%rs485, [%r8+7];
+	ld.shared.u8 	%rs484, [%r8+6];
+	ld.shared.u8 	%rs483, [%r8+5];
+	ld.shared.u8 	%rs482, [%r8+4];
+	ld.shared.u8 	%rs481, [%r8+3];
+	ld.shared.u8 	%rs480, [%r8+2];
+	ld.shared.u8 	%rs479, [%r8+1];
+	ld.shared.u8 	%rs478, [%r8];
+	.loc	1 198 13
+	ld.shared.u64 	%rd97, [%r8+64];
+	xor.b64  	%rd98, %rd97, 1;
+	st.shared.u64 	[%r8+64], %rd98;
+	.loc	1 199 13
+	ld.shared.u64 	%rd99, [%r8+128];
+	xor.b64  	%rd100, %rd99, -9223372036854775808;
+	st.shared.u64 	[%r8+128], %rd100;
 
-$L__BB1_10:
-	.loc	1 276 26
-	add.s32 	%r13, %r39, %r81;
-	add.s32 	%r14, %r39, %r83;
-	add.s32 	%r86, %r51, %r37;
-	add.s32 	%r15, %r86, %r87;
-	add.s32 	%r16, %r43, %r91;
-	add.s32 	%r17, %r39, %r93;
-	add.s32 	%r18, %r39, %r95;
-	add.s32 	%r19, %r39, %r97;
-	add.s32 	%r20, %r86, %r99;
-	mov.u32 	%r149, 0;
-
-$L__BB1_11:
-	.loc	1 314 9
-	.loc	1 118 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd69, [%r7+40];
-	ld.shared.u64 	%rd70, [%r7];
-	xor.b64  	%rd71, %rd69, %rd70;
-	ld.shared.u64 	%rd72, [%r7+80];
-	xor.b64  	%rd73, %rd71, %rd72;
-	ld.shared.u64 	%rd74, [%r7+120];
-	xor.b64  	%rd75, %rd73, %rd74;
-	ld.shared.u64 	%rd76, [%r7+160];
-	xor.b64  	%rd77, %rd75, %rd76;
-	st.shared.u64 	[%r41], %rd77;
-	.loc	1 119 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd78, [%r14];
+$L__BB0_10:
+	.loc	1 177 5
+	mov.u32 	%r214, _ZZ24kernel_lilypad_pow_debugE8cInBlock;
+	add.u64 	%rd101, %SP, 0;
+	add.u64 	%rd102, %SPL, 0;
+	.loc	1 202 9
+	.loc	1 71 5, function_name $L__info_string2, inlined_at 1 202 9
+	st.local.u32 	[%rd102], %r3;
+	mov.u64 	%rd103, $str;
+	cvta.global.u64 	%rd104, %rd103;
+	{ // callseq 1, 0
+	.reg .b32 temp_param_reg;
+	.param .b64 param0;
+	st.param.b64 	[param0+0], %rd104;
+	.param .b64 param1;
+	st.param.b64 	[param1+0], %rd101;
+	.param .b32 retval0;
+	call.uni (retval0), 
+	vprintf, 
+	(
+	param0, 
+	param1
+	);
+	ld.param.b32 	%r52, [retval0+0];
+	} // callseq 1
+	mul.lo.s32 	%r55, %r26, 200;
+	add.s32 	%r57, %r38, %r55;
+	add.s32 	%r59, %r57, %r58;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd105, [%r59+40];
+	ld.shared.u64 	%rd106, [%r59];
+	xor.b64  	%rd107, %rd105, %rd106;
+	ld.shared.u64 	%rd108, [%r59+80];
+	xor.b64  	%rd109, %rd107, %rd108;
+	ld.shared.u64 	%rd110, [%r59+120];
+	xor.b64  	%rd111, %rd109, %rd110;
+	ld.shared.u64 	%rd112, [%r59+160];
+	xor.b64  	%rd113, %rd111, %rd112;
+	.loc	1 177 5
+	add.s32 	%r61, %r214, %r55;
+	add.s32 	%r63, %r61, %r29;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd113;
+	add.s32 	%r64, %r61, %r58;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd114, [%r64+8];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
 	{
 	.reg .b32 %dummy;
-	mov.b64 	{%dummy,%r107}, %rd78;
+	mov.b64 	{%dummy,%r65}, %rd114;
 	}
 	{
 	.reg .b32 %dummy;
-	mov.b64 	{%r108,%dummy}, %rd78;
+	mov.b64 	{%r66,%dummy}, %rd114;
+	}
+	shf.l.wrap.b32 	%r67, %r66, %r65, 1;
+	shf.l.wrap.b32 	%r68, %r65, %r66, 1;
+	mov.b64 	%rd115, {%r68, %r67};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd116, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd117, %rd115, %rd116;
+	add.s32 	%r69, %r57, %r29;
+	ld.shared.u64 	%rd118, [%r69];
+	xor.b64  	%rd119, %rd117, %rd118;
+	st.shared.u64 	[%r69], %rd119;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	mul.wide.u16 	%r70, %rs343, 8;
+	add.s32 	%r71, %r57, %r70;
+	cvt.u64.u16 	%rd120, %rs344;
+	and.b64  	%rd121, %rd120, 255;
+	ld.shared.u64 	%rd122, [%r71];
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	cvt.u32.u16 	%r72, %rs344;
+	and.b32  	%r73, %r72, 255;
+	shl.b64 	%rd123, %rd122, %r73;
+	mov.u64 	%rd124, 64;
+	sub.s64 	%rd125, %rd124, %rd121;
+	cvt.u32.u64 	%r74, %rd125;
+	shr.u64 	%rd126, %rd122, %r74;
+	or.b64  	%rd127, %rd126, %rd123;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd127;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	mul.wide.u16 	%r75, %rs345, 8;
+	add.s32 	%r76, %r61, %r75;
+	ld.shared.u64 	%rd128, [%r76];
+	not.b64 	%rd129, %rd128;
+	mul.wide.u16 	%r77, %rs346, 8;
+	add.s32 	%r78, %r61, %r77;
+	ld.shared.u64 	%rd130, [%r78];
+	and.b64  	%rd131, %rd130, %rd129;
+	xor.b64  	%rd132, %rd131, %rd127;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd133, %rd132, %rd3;
+	st.shared.u64 	[%r69], %rd133;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd134, [%r59+40];
+	ld.shared.u64 	%rd135, [%r59];
+	xor.b64  	%rd136, %rd134, %rd135;
+	ld.shared.u64 	%rd137, [%r59+80];
+	xor.b64  	%rd138, %rd136, %rd137;
+	ld.shared.u64 	%rd139, [%r59+120];
+	xor.b64  	%rd140, %rd138, %rd139;
+	ld.shared.u64 	%rd141, [%r59+160];
+	xor.b64  	%rd142, %rd140, %rd141;
+	st.shared.u64 	[%r63], %rd142;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd143, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r79}, %rd143;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r80,%dummy}, %rd143;
+	}
+	shf.l.wrap.b32 	%r81, %r80, %r79, 1;
+	shf.l.wrap.b32 	%r82, %r79, %r80, 1;
+	mov.b64 	%rd144, {%r82, %r81};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd145, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd146, %rd144, %rd145;
+	xor.b64  	%rd147, %rd146, %rd133;
+	st.shared.u64 	[%r69], %rd147;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd148, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd149, %rd148, %r73;
+	shr.u64 	%rd150, %rd148, %r74;
+	or.b64  	%rd151, %rd150, %rd149;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd151;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd152, [%r76];
+	not.b64 	%rd153, %rd152;
+	ld.shared.u64 	%rd154, [%r78];
+	and.b64  	%rd155, %rd154, %rd153;
+	xor.b64  	%rd156, %rd155, %rd151;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd157, %rd156, %rd4;
+	st.shared.u64 	[%r69], %rd157;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd158, [%r59+40];
+	ld.shared.u64 	%rd159, [%r59];
+	xor.b64  	%rd160, %rd158, %rd159;
+	ld.shared.u64 	%rd161, [%r59+80];
+	xor.b64  	%rd162, %rd160, %rd161;
+	ld.shared.u64 	%rd163, [%r59+120];
+	xor.b64  	%rd164, %rd162, %rd163;
+	ld.shared.u64 	%rd165, [%r59+160];
+	xor.b64  	%rd166, %rd164, %rd165;
+	st.shared.u64 	[%r63], %rd166;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd167, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r83}, %rd167;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r84,%dummy}, %rd167;
+	}
+	shf.l.wrap.b32 	%r85, %r84, %r83, 1;
+	shf.l.wrap.b32 	%r86, %r83, %r84, 1;
+	mov.b64 	%rd168, {%r86, %r85};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd169, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd170, %rd168, %rd169;
+	xor.b64  	%rd171, %rd170, %rd157;
+	st.shared.u64 	[%r69], %rd171;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd172, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd173, %rd172, %r73;
+	shr.u64 	%rd174, %rd172, %r74;
+	or.b64  	%rd175, %rd174, %rd173;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd175;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd176, [%r76];
+	not.b64 	%rd177, %rd176;
+	ld.shared.u64 	%rd178, [%r78];
+	and.b64  	%rd179, %rd178, %rd177;
+	xor.b64  	%rd180, %rd179, %rd175;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd181, %rd180, %rd5;
+	st.shared.u64 	[%r69], %rd181;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd182, [%r59+40];
+	ld.shared.u64 	%rd183, [%r59];
+	xor.b64  	%rd184, %rd182, %rd183;
+	ld.shared.u64 	%rd185, [%r59+80];
+	xor.b64  	%rd186, %rd184, %rd185;
+	ld.shared.u64 	%rd187, [%r59+120];
+	xor.b64  	%rd188, %rd186, %rd187;
+	ld.shared.u64 	%rd189, [%r59+160];
+	xor.b64  	%rd190, %rd188, %rd189;
+	st.shared.u64 	[%r63], %rd190;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd191, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r87}, %rd191;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r88,%dummy}, %rd191;
+	}
+	shf.l.wrap.b32 	%r89, %r88, %r87, 1;
+	shf.l.wrap.b32 	%r90, %r87, %r88, 1;
+	mov.b64 	%rd192, {%r90, %r89};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd193, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd194, %rd192, %rd193;
+	xor.b64  	%rd195, %rd194, %rd181;
+	st.shared.u64 	[%r69], %rd195;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd196, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd197, %rd196, %r73;
+	shr.u64 	%rd198, %rd196, %r74;
+	or.b64  	%rd199, %rd198, %rd197;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd199;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd200, [%r76];
+	not.b64 	%rd201, %rd200;
+	ld.shared.u64 	%rd202, [%r78];
+	and.b64  	%rd203, %rd202, %rd201;
+	xor.b64  	%rd204, %rd203, %rd199;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd205, %rd204, %rd6;
+	st.shared.u64 	[%r69], %rd205;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd206, [%r59+40];
+	ld.shared.u64 	%rd207, [%r59];
+	xor.b64  	%rd208, %rd206, %rd207;
+	ld.shared.u64 	%rd209, [%r59+80];
+	xor.b64  	%rd210, %rd208, %rd209;
+	ld.shared.u64 	%rd211, [%r59+120];
+	xor.b64  	%rd212, %rd210, %rd211;
+	ld.shared.u64 	%rd213, [%r59+160];
+	xor.b64  	%rd214, %rd212, %rd213;
+	st.shared.u64 	[%r63], %rd214;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd215, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r91}, %rd215;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r92,%dummy}, %rd215;
+	}
+	shf.l.wrap.b32 	%r93, %r92, %r91, 1;
+	shf.l.wrap.b32 	%r94, %r91, %r92, 1;
+	mov.b64 	%rd216, {%r94, %r93};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd217, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd218, %rd216, %rd217;
+	xor.b64  	%rd219, %rd218, %rd205;
+	st.shared.u64 	[%r69], %rd219;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd220, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd221, %rd220, %r73;
+	shr.u64 	%rd222, %rd220, %r74;
+	or.b64  	%rd223, %rd222, %rd221;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd223;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd224, [%r76];
+	not.b64 	%rd225, %rd224;
+	ld.shared.u64 	%rd226, [%r78];
+	and.b64  	%rd227, %rd226, %rd225;
+	xor.b64  	%rd228, %rd227, %rd223;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd229, %rd228, %rd7;
+	st.shared.u64 	[%r69], %rd229;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd230, [%r59+40];
+	ld.shared.u64 	%rd231, [%r59];
+	xor.b64  	%rd232, %rd230, %rd231;
+	ld.shared.u64 	%rd233, [%r59+80];
+	xor.b64  	%rd234, %rd232, %rd233;
+	ld.shared.u64 	%rd235, [%r59+120];
+	xor.b64  	%rd236, %rd234, %rd235;
+	ld.shared.u64 	%rd237, [%r59+160];
+	xor.b64  	%rd238, %rd236, %rd237;
+	st.shared.u64 	[%r63], %rd238;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd239, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r95}, %rd239;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r96,%dummy}, %rd239;
+	}
+	shf.l.wrap.b32 	%r97, %r96, %r95, 1;
+	shf.l.wrap.b32 	%r98, %r95, %r96, 1;
+	mov.b64 	%rd240, {%r98, %r97};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd241, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd242, %rd240, %rd241;
+	xor.b64  	%rd243, %rd242, %rd229;
+	st.shared.u64 	[%r69], %rd243;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd244, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd245, %rd244, %r73;
+	shr.u64 	%rd246, %rd244, %r74;
+	or.b64  	%rd247, %rd246, %rd245;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd247;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd248, [%r76];
+	not.b64 	%rd249, %rd248;
+	ld.shared.u64 	%rd250, [%r78];
+	and.b64  	%rd251, %rd250, %rd249;
+	xor.b64  	%rd252, %rd251, %rd247;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd253, %rd252, %rd8;
+	st.shared.u64 	[%r69], %rd253;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd254, [%r59+40];
+	ld.shared.u64 	%rd255, [%r59];
+	xor.b64  	%rd256, %rd254, %rd255;
+	ld.shared.u64 	%rd257, [%r59+80];
+	xor.b64  	%rd258, %rd256, %rd257;
+	ld.shared.u64 	%rd259, [%r59+120];
+	xor.b64  	%rd260, %rd258, %rd259;
+	ld.shared.u64 	%rd261, [%r59+160];
+	xor.b64  	%rd262, %rd260, %rd261;
+	st.shared.u64 	[%r63], %rd262;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd263, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r99}, %rd263;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r100,%dummy}, %rd263;
+	}
+	shf.l.wrap.b32 	%r101, %r100, %r99, 1;
+	shf.l.wrap.b32 	%r102, %r99, %r100, 1;
+	mov.b64 	%rd264, {%r102, %r101};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd265, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd266, %rd264, %rd265;
+	xor.b64  	%rd267, %rd266, %rd253;
+	st.shared.u64 	[%r69], %rd267;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd268, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd269, %rd268, %r73;
+	shr.u64 	%rd270, %rd268, %r74;
+	or.b64  	%rd271, %rd270, %rd269;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd271;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd272, [%r76];
+	not.b64 	%rd273, %rd272;
+	ld.shared.u64 	%rd274, [%r78];
+	and.b64  	%rd275, %rd274, %rd273;
+	xor.b64  	%rd276, %rd275, %rd271;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd277, %rd276, %rd9;
+	st.shared.u64 	[%r69], %rd277;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd278, [%r59+40];
+	ld.shared.u64 	%rd279, [%r59];
+	xor.b64  	%rd280, %rd278, %rd279;
+	ld.shared.u64 	%rd281, [%r59+80];
+	xor.b64  	%rd282, %rd280, %rd281;
+	ld.shared.u64 	%rd283, [%r59+120];
+	xor.b64  	%rd284, %rd282, %rd283;
+	ld.shared.u64 	%rd285, [%r59+160];
+	xor.b64  	%rd286, %rd284, %rd285;
+	st.shared.u64 	[%r63], %rd286;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd287, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r103}, %rd287;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r104,%dummy}, %rd287;
+	}
+	shf.l.wrap.b32 	%r105, %r104, %r103, 1;
+	shf.l.wrap.b32 	%r106, %r103, %r104, 1;
+	mov.b64 	%rd288, {%r106, %r105};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd289, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd290, %rd288, %rd289;
+	xor.b64  	%rd291, %rd290, %rd277;
+	st.shared.u64 	[%r69], %rd291;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd292, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd293, %rd292, %r73;
+	shr.u64 	%rd294, %rd292, %r74;
+	or.b64  	%rd295, %rd294, %rd293;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd295;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd296, [%r76];
+	not.b64 	%rd297, %rd296;
+	ld.shared.u64 	%rd298, [%r78];
+	and.b64  	%rd299, %rd298, %rd297;
+	xor.b64  	%rd300, %rd299, %rd295;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd301, %rd300, %rd10;
+	st.shared.u64 	[%r69], %rd301;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd302, [%r59+40];
+	ld.shared.u64 	%rd303, [%r59];
+	xor.b64  	%rd304, %rd302, %rd303;
+	ld.shared.u64 	%rd305, [%r59+80];
+	xor.b64  	%rd306, %rd304, %rd305;
+	ld.shared.u64 	%rd307, [%r59+120];
+	xor.b64  	%rd308, %rd306, %rd307;
+	ld.shared.u64 	%rd309, [%r59+160];
+	xor.b64  	%rd310, %rd308, %rd309;
+	st.shared.u64 	[%r63], %rd310;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd311, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r107}, %rd311;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r108,%dummy}, %rd311;
 	}
 	shf.l.wrap.b32 	%r109, %r108, %r107, 1;
 	shf.l.wrap.b32 	%r110, %r107, %r108, 1;
-	mov.b64 	%rd79, {%r110, %r109};
-	ld.shared.u64 	%rd80, [%r13];
-	xor.b64  	%rd81, %rd79, %rd80;
-	st.shared.u64 	[%r44], %rd81;
-	.loc	1 120 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd82, [%r16];
-	ld.shared.u64 	%rd83, [%r15];
-	xor.b64  	%rd84, %rd82, %rd83;
-	cvt.u32.u64 	%r114, %rd17;
-	shl.b64 	%rd85, %rd84, %r114;
-	cvt.u32.u64 	%r115, %rd18;
-	shr.u64 	%rd86, %rd84, %r115;
-	xor.b64  	%rd87, %rd86, %rd85;
-	st.shared.u64 	[%r41], %rd87;
-	.loc	1 121 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd88, [%r18];
-	not.b64 	%rd89, %rd88;
-	ld.shared.u64 	%rd90, [%r19];
-	and.b64  	%rd91, %rd90, %rd89;
-	ld.shared.u64 	%rd92, [%r17];
-	xor.b64  	%rd93, %rd91, %rd92;
-	st.shared.u64 	[%r20], %rd93;
-	.loc	1 122 9, function_name $L__info_string2, inlined_at 1 314 9
-	selp.u32 	%r116, 1, 0, %p4;
-	mul.wide.u32 	%rd94, %r116, 192;
-	mov.u64 	%rd95, rc;
-	add.s64 	%rd96, %rd95, %rd94;
-	mul.wide.s32 	%rd97, %r149, 8;
-	add.s64 	%rd98, %rd96, %rd97;
-	add.s32 	%r119, %r86, %r40;
-	ld.shared.u64 	%rd99, [%r119];
-	ld.const.u64 	%rd100, [%rd98];
-	xor.b64  	%rd101, %rd99, %rd100;
-	st.shared.u64 	[%r119], %rd101;
-	.loc	1 118 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd102, [%r7+40];
-	ld.shared.u64 	%rd103, [%r7];
-	xor.b64  	%rd104, %rd102, %rd103;
-	ld.shared.u64 	%rd105, [%r7+80];
-	xor.b64  	%rd106, %rd104, %rd105;
-	ld.shared.u64 	%rd107, [%r7+120];
-	xor.b64  	%rd108, %rd106, %rd107;
-	ld.shared.u64 	%rd109, [%r7+160];
-	xor.b64  	%rd110, %rd108, %rd109;
-	st.shared.u64 	[%r41], %rd110;
-	.loc	1 119 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd111, [%r14];
+	mov.b64 	%rd312, {%r110, %r109};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd313, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd314, %rd312, %rd313;
+	xor.b64  	%rd315, %rd314, %rd301;
+	st.shared.u64 	[%r69], %rd315;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd316, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd317, %rd316, %r73;
+	shr.u64 	%rd318, %rd316, %r74;
+	or.b64  	%rd319, %rd318, %rd317;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd319;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd320, [%r76];
+	not.b64 	%rd321, %rd320;
+	ld.shared.u64 	%rd322, [%r78];
+	and.b64  	%rd323, %rd322, %rd321;
+	xor.b64  	%rd324, %rd323, %rd319;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd325, %rd324, %rd11;
+	st.shared.u64 	[%r69], %rd325;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd326, [%r59+40];
+	ld.shared.u64 	%rd327, [%r59];
+	xor.b64  	%rd328, %rd326, %rd327;
+	ld.shared.u64 	%rd329, [%r59+80];
+	xor.b64  	%rd330, %rd328, %rd329;
+	ld.shared.u64 	%rd331, [%r59+120];
+	xor.b64  	%rd332, %rd330, %rd331;
+	ld.shared.u64 	%rd333, [%r59+160];
+	xor.b64  	%rd334, %rd332, %rd333;
+	st.shared.u64 	[%r63], %rd334;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd335, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
 	{
 	.reg .b32 %dummy;
-	mov.b64 	{%dummy,%r120}, %rd111;
+	mov.b64 	{%dummy,%r111}, %rd335;
 	}
 	{
 	.reg .b32 %dummy;
-	mov.b64 	{%r121,%dummy}, %rd111;
+	mov.b64 	{%r112,%dummy}, %rd335;
 	}
-	shf.l.wrap.b32 	%r122, %r121, %r120, 1;
-	shf.l.wrap.b32 	%r123, %r120, %r121, 1;
-	mov.b64 	%rd112, {%r123, %r122};
-	ld.shared.u64 	%rd113, [%r13];
-	xor.b64  	%rd114, %rd112, %rd113;
-	st.shared.u64 	[%r44], %rd114;
-	.loc	1 120 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd115, [%r16];
-	ld.shared.u64 	%rd116, [%r15];
-	xor.b64  	%rd117, %rd115, %rd116;
-	shl.b64 	%rd118, %rd117, %r114;
-	shr.u64 	%rd119, %rd117, %r115;
-	xor.b64  	%rd120, %rd119, %rd118;
-	st.shared.u64 	[%r41], %rd120;
-	.loc	1 121 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd121, [%r18];
-	not.b64 	%rd122, %rd121;
-	ld.shared.u64 	%rd123, [%r19];
-	and.b64  	%rd124, %rd123, %rd122;
-	ld.shared.u64 	%rd125, [%r17];
-	xor.b64  	%rd126, %rd124, %rd125;
-	st.shared.u64 	[%r20], %rd126;
-	.loc	1 122 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd127, [%r119];
-	ld.const.u64 	%rd128, [%rd98+8];
-	xor.b64  	%rd129, %rd127, %rd128;
-	st.shared.u64 	[%r119], %rd129;
-	.loc	1 118 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd130, [%r7+40];
-	ld.shared.u64 	%rd131, [%r7];
-	xor.b64  	%rd132, %rd130, %rd131;
-	ld.shared.u64 	%rd133, [%r7+80];
-	xor.b64  	%rd134, %rd132, %rd133;
-	ld.shared.u64 	%rd135, [%r7+120];
-	xor.b64  	%rd136, %rd134, %rd135;
-	ld.shared.u64 	%rd137, [%r7+160];
-	xor.b64  	%rd138, %rd136, %rd137;
-	st.shared.u64 	[%r41], %rd138;
-	.loc	1 119 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd139, [%r14];
+	shf.l.wrap.b32 	%r113, %r112, %r111, 1;
+	shf.l.wrap.b32 	%r114, %r111, %r112, 1;
+	mov.b64 	%rd336, {%r114, %r113};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd337, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd338, %rd336, %rd337;
+	xor.b64  	%rd339, %rd338, %rd325;
+	st.shared.u64 	[%r69], %rd339;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd340, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd341, %rd340, %r73;
+	shr.u64 	%rd342, %rd340, %r74;
+	or.b64  	%rd343, %rd342, %rd341;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd343;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd344, [%r76];
+	not.b64 	%rd345, %rd344;
+	ld.shared.u64 	%rd346, [%r78];
+	and.b64  	%rd347, %rd346, %rd345;
+	xor.b64  	%rd348, %rd347, %rd343;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd349, %rd348, %rd12;
+	st.shared.u64 	[%r69], %rd349;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd350, [%r59+40];
+	ld.shared.u64 	%rd351, [%r59];
+	xor.b64  	%rd352, %rd350, %rd351;
+	ld.shared.u64 	%rd353, [%r59+80];
+	xor.b64  	%rd354, %rd352, %rd353;
+	ld.shared.u64 	%rd355, [%r59+120];
+	xor.b64  	%rd356, %rd354, %rd355;
+	ld.shared.u64 	%rd357, [%r59+160];
+	xor.b64  	%rd358, %rd356, %rd357;
+	st.shared.u64 	[%r63], %rd358;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd359, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
 	{
 	.reg .b32 %dummy;
-	mov.b64 	{%dummy,%r124}, %rd139;
-	}
-	{
-	.reg .b32 %dummy;
-	mov.b64 	{%r125,%dummy}, %rd139;
-	}
-	shf.l.wrap.b32 	%r126, %r125, %r124, 1;
-	shf.l.wrap.b32 	%r127, %r124, %r125, 1;
-	mov.b64 	%rd140, {%r127, %r126};
-	ld.shared.u64 	%rd141, [%r13];
-	xor.b64  	%rd142, %rd140, %rd141;
-	st.shared.u64 	[%r44], %rd142;
-	.loc	1 120 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd143, [%r16];
-	ld.shared.u64 	%rd144, [%r15];
-	xor.b64  	%rd145, %rd143, %rd144;
-	shl.b64 	%rd146, %rd145, %r114;
-	shr.u64 	%rd147, %rd145, %r115;
-	xor.b64  	%rd148, %rd147, %rd146;
-	st.shared.u64 	[%r41], %rd148;
-	.loc	1 121 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd149, [%r18];
-	not.b64 	%rd150, %rd149;
-	ld.shared.u64 	%rd151, [%r19];
-	and.b64  	%rd152, %rd151, %rd150;
-	ld.shared.u64 	%rd153, [%r17];
-	xor.b64  	%rd154, %rd152, %rd153;
-	st.shared.u64 	[%r20], %rd154;
-	.loc	1 122 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd155, [%r119];
-	ld.const.u64 	%rd156, [%rd98+16];
-	xor.b64  	%rd157, %rd155, %rd156;
-	st.shared.u64 	[%r119], %rd157;
-	.loc	1 118 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd158, [%r7+40];
-	ld.shared.u64 	%rd159, [%r7];
-	xor.b64  	%rd160, %rd158, %rd159;
-	ld.shared.u64 	%rd161, [%r7+80];
-	xor.b64  	%rd162, %rd160, %rd161;
-	ld.shared.u64 	%rd163, [%r7+120];
-	xor.b64  	%rd164, %rd162, %rd163;
-	ld.shared.u64 	%rd165, [%r7+160];
-	xor.b64  	%rd166, %rd164, %rd165;
-	st.shared.u64 	[%r41], %rd166;
-	.loc	1 119 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd167, [%r14];
-	{
-	.reg .b32 %dummy;
-	mov.b64 	{%dummy,%r128}, %rd167;
+	mov.b64 	{%dummy,%r115}, %rd359;
 	}
 	{
 	.reg .b32 %dummy;
-	mov.b64 	{%r129,%dummy}, %rd167;
+	mov.b64 	{%r116,%dummy}, %rd359;
 	}
-	shf.l.wrap.b32 	%r130, %r129, %r128, 1;
-	shf.l.wrap.b32 	%r131, %r128, %r129, 1;
-	mov.b64 	%rd168, {%r131, %r130};
-	ld.shared.u64 	%rd169, [%r13];
-	xor.b64  	%rd170, %rd168, %rd169;
-	st.shared.u64 	[%r44], %rd170;
-	.loc	1 120 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd171, [%r16];
-	ld.shared.u64 	%rd172, [%r15];
-	xor.b64  	%rd173, %rd171, %rd172;
-	shl.b64 	%rd174, %rd173, %r114;
-	shr.u64 	%rd175, %rd173, %r115;
-	xor.b64  	%rd176, %rd175, %rd174;
-	st.shared.u64 	[%r41], %rd176;
-	.loc	1 121 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd177, [%r18];
-	not.b64 	%rd178, %rd177;
-	ld.shared.u64 	%rd179, [%r19];
-	and.b64  	%rd180, %rd179, %rd178;
-	ld.shared.u64 	%rd181, [%r17];
-	xor.b64  	%rd182, %rd180, %rd181;
-	st.shared.u64 	[%r20], %rd182;
-	.loc	1 122 9, function_name $L__info_string2, inlined_at 1 314 9
-	ld.shared.u64 	%rd183, [%r119];
-	ld.const.u64 	%rd184, [%rd98+24];
-	xor.b64  	%rd185, %rd183, %rd184;
-	st.shared.u64 	[%r119], %rd185;
-	.loc	1 116 29, function_name $L__info_string2, inlined_at 1 314 9
-	add.s32 	%r149, %r149, 4;
-	.loc	1 116 5, function_name $L__info_string2, inlined_at 1 314 9
-	setp.ne.s32 	%p11, %r149, 24;
-	@%p11 bra 	$L__BB1_11;
+	shf.l.wrap.b32 	%r117, %r116, %r115, 1;
+	shf.l.wrap.b32 	%r118, %r115, %r116, 1;
+	mov.b64 	%rd360, {%r118, %r117};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd361, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd362, %rd360, %rd361;
+	xor.b64  	%rd363, %rd362, %rd349;
+	st.shared.u64 	[%r69], %rd363;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd364, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd365, %rd364, %r73;
+	shr.u64 	%rd366, %rd364, %r74;
+	or.b64  	%rd367, %rd366, %rd365;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd367;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd368, [%r76];
+	not.b64 	%rd369, %rd368;
+	ld.shared.u64 	%rd370, [%r78];
+	and.b64  	%rd371, %rd370, %rd369;
+	xor.b64  	%rd372, %rd371, %rd367;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd373, %rd372, %rd13;
+	st.shared.u64 	[%r69], %rd373;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd374, [%r59+40];
+	ld.shared.u64 	%rd375, [%r59];
+	xor.b64  	%rd376, %rd374, %rd375;
+	ld.shared.u64 	%rd377, [%r59+80];
+	xor.b64  	%rd378, %rd376, %rd377;
+	ld.shared.u64 	%rd379, [%r59+120];
+	xor.b64  	%rd380, %rd378, %rd379;
+	ld.shared.u64 	%rd381, [%r59+160];
+	xor.b64  	%rd382, %rd380, %rd381;
+	st.shared.u64 	[%r63], %rd382;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd383, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r119}, %rd383;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r120,%dummy}, %rd383;
+	}
+	shf.l.wrap.b32 	%r121, %r120, %r119, 1;
+	shf.l.wrap.b32 	%r122, %r119, %r120, 1;
+	mov.b64 	%rd384, {%r122, %r121};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd385, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd386, %rd384, %rd385;
+	xor.b64  	%rd387, %rd386, %rd373;
+	st.shared.u64 	[%r69], %rd387;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd388, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd389, %rd388, %r73;
+	shr.u64 	%rd390, %rd388, %r74;
+	or.b64  	%rd391, %rd390, %rd389;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd391;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd392, [%r76];
+	not.b64 	%rd393, %rd392;
+	ld.shared.u64 	%rd394, [%r78];
+	and.b64  	%rd395, %rd394, %rd393;
+	xor.b64  	%rd396, %rd395, %rd391;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd397, %rd396, %rd14;
+	st.shared.u64 	[%r69], %rd397;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd398, [%r59+40];
+	ld.shared.u64 	%rd399, [%r59];
+	xor.b64  	%rd400, %rd398, %rd399;
+	ld.shared.u64 	%rd401, [%r59+80];
+	xor.b64  	%rd402, %rd400, %rd401;
+	ld.shared.u64 	%rd403, [%r59+120];
+	xor.b64  	%rd404, %rd402, %rd403;
+	ld.shared.u64 	%rd405, [%r59+160];
+	xor.b64  	%rd406, %rd404, %rd405;
+	st.shared.u64 	[%r63], %rd406;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd407, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r123}, %rd407;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r124,%dummy}, %rd407;
+	}
+	shf.l.wrap.b32 	%r125, %r124, %r123, 1;
+	shf.l.wrap.b32 	%r126, %r123, %r124, 1;
+	mov.b64 	%rd408, {%r126, %r125};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd409, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd410, %rd408, %rd409;
+	xor.b64  	%rd411, %rd410, %rd397;
+	st.shared.u64 	[%r69], %rd411;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd412, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd413, %rd412, %r73;
+	shr.u64 	%rd414, %rd412, %r74;
+	or.b64  	%rd415, %rd414, %rd413;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd415;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd416, [%r76];
+	not.b64 	%rd417, %rd416;
+	ld.shared.u64 	%rd418, [%r78];
+	and.b64  	%rd419, %rd418, %rd417;
+	xor.b64  	%rd420, %rd419, %rd415;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd421, %rd420, %rd15;
+	st.shared.u64 	[%r69], %rd421;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd422, [%r59+40];
+	ld.shared.u64 	%rd423, [%r59];
+	xor.b64  	%rd424, %rd422, %rd423;
+	ld.shared.u64 	%rd425, [%r59+80];
+	xor.b64  	%rd426, %rd424, %rd425;
+	ld.shared.u64 	%rd427, [%r59+120];
+	xor.b64  	%rd428, %rd426, %rd427;
+	ld.shared.u64 	%rd429, [%r59+160];
+	xor.b64  	%rd430, %rd428, %rd429;
+	st.shared.u64 	[%r63], %rd430;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd431, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r127}, %rd431;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r128,%dummy}, %rd431;
+	}
+	shf.l.wrap.b32 	%r129, %r128, %r127, 1;
+	shf.l.wrap.b32 	%r130, %r127, %r128, 1;
+	mov.b64 	%rd432, {%r130, %r129};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd433, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd434, %rd432, %rd433;
+	xor.b64  	%rd435, %rd434, %rd421;
+	st.shared.u64 	[%r69], %rd435;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd436, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd437, %rd436, %r73;
+	shr.u64 	%rd438, %rd436, %r74;
+	or.b64  	%rd439, %rd438, %rd437;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd439;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd440, [%r76];
+	not.b64 	%rd441, %rd440;
+	ld.shared.u64 	%rd442, [%r78];
+	and.b64  	%rd443, %rd442, %rd441;
+	xor.b64  	%rd444, %rd443, %rd439;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd445, %rd444, %rd16;
+	st.shared.u64 	[%r69], %rd445;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd446, [%r59+40];
+	ld.shared.u64 	%rd447, [%r59];
+	xor.b64  	%rd448, %rd446, %rd447;
+	ld.shared.u64 	%rd449, [%r59+80];
+	xor.b64  	%rd450, %rd448, %rd449;
+	ld.shared.u64 	%rd451, [%r59+120];
+	xor.b64  	%rd452, %rd450, %rd451;
+	ld.shared.u64 	%rd453, [%r59+160];
+	xor.b64  	%rd454, %rd452, %rd453;
+	st.shared.u64 	[%r63], %rd454;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd455, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r131}, %rd455;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r132,%dummy}, %rd455;
+	}
+	shf.l.wrap.b32 	%r133, %r132, %r131, 1;
+	shf.l.wrap.b32 	%r134, %r131, %r132, 1;
+	mov.b64 	%rd456, {%r134, %r133};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd457, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd458, %rd456, %rd457;
+	xor.b64  	%rd459, %rd458, %rd445;
+	st.shared.u64 	[%r69], %rd459;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd460, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd461, %rd460, %r73;
+	shr.u64 	%rd462, %rd460, %r74;
+	or.b64  	%rd463, %rd462, %rd461;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd463;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd464, [%r76];
+	not.b64 	%rd465, %rd464;
+	ld.shared.u64 	%rd466, [%r78];
+	and.b64  	%rd467, %rd466, %rd465;
+	xor.b64  	%rd468, %rd467, %rd463;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd469, %rd468, %rd17;
+	st.shared.u64 	[%r69], %rd469;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd470, [%r59+40];
+	ld.shared.u64 	%rd471, [%r59];
+	xor.b64  	%rd472, %rd470, %rd471;
+	ld.shared.u64 	%rd473, [%r59+80];
+	xor.b64  	%rd474, %rd472, %rd473;
+	ld.shared.u64 	%rd475, [%r59+120];
+	xor.b64  	%rd476, %rd474, %rd475;
+	ld.shared.u64 	%rd477, [%r59+160];
+	xor.b64  	%rd478, %rd476, %rd477;
+	st.shared.u64 	[%r63], %rd478;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd479, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r135}, %rd479;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r136,%dummy}, %rd479;
+	}
+	shf.l.wrap.b32 	%r137, %r136, %r135, 1;
+	shf.l.wrap.b32 	%r138, %r135, %r136, 1;
+	mov.b64 	%rd480, {%r138, %r137};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd481, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd482, %rd480, %rd481;
+	xor.b64  	%rd483, %rd482, %rd469;
+	st.shared.u64 	[%r69], %rd483;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd484, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd485, %rd484, %r73;
+	shr.u64 	%rd486, %rd484, %r74;
+	or.b64  	%rd487, %rd486, %rd485;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd487;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd488, [%r76];
+	not.b64 	%rd489, %rd488;
+	ld.shared.u64 	%rd490, [%r78];
+	and.b64  	%rd491, %rd490, %rd489;
+	xor.b64  	%rd492, %rd491, %rd487;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd493, %rd492, %rd18;
+	st.shared.u64 	[%r69], %rd493;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd494, [%r59+40];
+	ld.shared.u64 	%rd495, [%r59];
+	xor.b64  	%rd496, %rd494, %rd495;
+	ld.shared.u64 	%rd497, [%r59+80];
+	xor.b64  	%rd498, %rd496, %rd497;
+	ld.shared.u64 	%rd499, [%r59+120];
+	xor.b64  	%rd500, %rd498, %rd499;
+	ld.shared.u64 	%rd501, [%r59+160];
+	xor.b64  	%rd502, %rd500, %rd501;
+	st.shared.u64 	[%r63], %rd502;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd503, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r139}, %rd503;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r140,%dummy}, %rd503;
+	}
+	shf.l.wrap.b32 	%r141, %r140, %r139, 1;
+	shf.l.wrap.b32 	%r142, %r139, %r140, 1;
+	mov.b64 	%rd504, {%r142, %r141};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd505, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd506, %rd504, %rd505;
+	xor.b64  	%rd507, %rd506, %rd493;
+	st.shared.u64 	[%r69], %rd507;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd508, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd509, %rd508, %r73;
+	shr.u64 	%rd510, %rd508, %r74;
+	or.b64  	%rd511, %rd510, %rd509;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd511;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd512, [%r76];
+	not.b64 	%rd513, %rd512;
+	ld.shared.u64 	%rd514, [%r78];
+	and.b64  	%rd515, %rd514, %rd513;
+	xor.b64  	%rd516, %rd515, %rd511;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd517, %rd516, %rd19;
+	st.shared.u64 	[%r69], %rd517;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd518, [%r59+40];
+	ld.shared.u64 	%rd519, [%r59];
+	xor.b64  	%rd520, %rd518, %rd519;
+	ld.shared.u64 	%rd521, [%r59+80];
+	xor.b64  	%rd522, %rd520, %rd521;
+	ld.shared.u64 	%rd523, [%r59+120];
+	xor.b64  	%rd524, %rd522, %rd523;
+	ld.shared.u64 	%rd525, [%r59+160];
+	xor.b64  	%rd526, %rd524, %rd525;
+	st.shared.u64 	[%r63], %rd526;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd527, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r143}, %rd527;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r144,%dummy}, %rd527;
+	}
+	shf.l.wrap.b32 	%r145, %r144, %r143, 1;
+	shf.l.wrap.b32 	%r146, %r143, %r144, 1;
+	mov.b64 	%rd528, {%r146, %r145};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd529, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd530, %rd528, %rd529;
+	xor.b64  	%rd531, %rd530, %rd517;
+	st.shared.u64 	[%r69], %rd531;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd532, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd533, %rd532, %r73;
+	shr.u64 	%rd534, %rd532, %r74;
+	or.b64  	%rd535, %rd534, %rd533;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd535;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd536, [%r76];
+	not.b64 	%rd537, %rd536;
+	ld.shared.u64 	%rd538, [%r78];
+	and.b64  	%rd539, %rd538, %rd537;
+	xor.b64  	%rd540, %rd539, %rd535;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd541, %rd540, %rd20;
+	st.shared.u64 	[%r69], %rd541;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd542, [%r59+40];
+	ld.shared.u64 	%rd543, [%r59];
+	xor.b64  	%rd544, %rd542, %rd543;
+	ld.shared.u64 	%rd545, [%r59+80];
+	xor.b64  	%rd546, %rd544, %rd545;
+	ld.shared.u64 	%rd547, [%r59+120];
+	xor.b64  	%rd548, %rd546, %rd547;
+	ld.shared.u64 	%rd549, [%r59+160];
+	xor.b64  	%rd550, %rd548, %rd549;
+	st.shared.u64 	[%r63], %rd550;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd551, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r147}, %rd551;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r148,%dummy}, %rd551;
+	}
+	shf.l.wrap.b32 	%r149, %r148, %r147, 1;
+	shf.l.wrap.b32 	%r150, %r147, %r148, 1;
+	mov.b64 	%rd552, {%r150, %r149};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd553, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd554, %rd552, %rd553;
+	xor.b64  	%rd555, %rd554, %rd541;
+	st.shared.u64 	[%r69], %rd555;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd556, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd557, %rd556, %r73;
+	shr.u64 	%rd558, %rd556, %r74;
+	or.b64  	%rd559, %rd558, %rd557;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd559;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd560, [%r76];
+	not.b64 	%rd561, %rd560;
+	ld.shared.u64 	%rd562, [%r78];
+	and.b64  	%rd563, %rd562, %rd561;
+	xor.b64  	%rd564, %rd563, %rd559;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd565, %rd564, %rd21;
+	st.shared.u64 	[%r69], %rd565;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd566, [%r59+40];
+	ld.shared.u64 	%rd567, [%r59];
+	xor.b64  	%rd568, %rd566, %rd567;
+	ld.shared.u64 	%rd569, [%r59+80];
+	xor.b64  	%rd570, %rd568, %rd569;
+	ld.shared.u64 	%rd571, [%r59+120];
+	xor.b64  	%rd572, %rd570, %rd571;
+	ld.shared.u64 	%rd573, [%r59+160];
+	xor.b64  	%rd574, %rd572, %rd573;
+	st.shared.u64 	[%r63], %rd574;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd575, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r151}, %rd575;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r152,%dummy}, %rd575;
+	}
+	shf.l.wrap.b32 	%r153, %r152, %r151, 1;
+	shf.l.wrap.b32 	%r154, %r151, %r152, 1;
+	mov.b64 	%rd576, {%r154, %r153};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd577, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd578, %rd576, %rd577;
+	xor.b64  	%rd579, %rd578, %rd565;
+	st.shared.u64 	[%r69], %rd579;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd580, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd581, %rd580, %r73;
+	shr.u64 	%rd582, %rd580, %r74;
+	or.b64  	%rd583, %rd582, %rd581;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd583;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd584, [%r76];
+	not.b64 	%rd585, %rd584;
+	ld.shared.u64 	%rd586, [%r78];
+	and.b64  	%rd587, %rd586, %rd585;
+	xor.b64  	%rd588, %rd587, %rd583;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd589, %rd588, %rd22;
+	st.shared.u64 	[%r69], %rd589;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd590, [%r59+40];
+	ld.shared.u64 	%rd591, [%r59];
+	xor.b64  	%rd592, %rd590, %rd591;
+	ld.shared.u64 	%rd593, [%r59+80];
+	xor.b64  	%rd594, %rd592, %rd593;
+	ld.shared.u64 	%rd595, [%r59+120];
+	xor.b64  	%rd596, %rd594, %rd595;
+	ld.shared.u64 	%rd597, [%r59+160];
+	xor.b64  	%rd598, %rd596, %rd597;
+	st.shared.u64 	[%r63], %rd598;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd599, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r155}, %rd599;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r156,%dummy}, %rd599;
+	}
+	shf.l.wrap.b32 	%r157, %r156, %r155, 1;
+	shf.l.wrap.b32 	%r158, %r155, %r156, 1;
+	mov.b64 	%rd600, {%r158, %r157};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd601, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd602, %rd600, %rd601;
+	xor.b64  	%rd603, %rd602, %rd589;
+	st.shared.u64 	[%r69], %rd603;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd604, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd605, %rd604, %r73;
+	shr.u64 	%rd606, %rd604, %r74;
+	or.b64  	%rd607, %rd606, %rd605;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd607;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd608, [%r76];
+	not.b64 	%rd609, %rd608;
+	ld.shared.u64 	%rd610, [%r78];
+	and.b64  	%rd611, %rd610, %rd609;
+	xor.b64  	%rd612, %rd611, %rd607;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd613, %rd612, %rd23;
+	st.shared.u64 	[%r69], %rd613;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd614, [%r59+40];
+	ld.shared.u64 	%rd615, [%r59];
+	xor.b64  	%rd616, %rd614, %rd615;
+	ld.shared.u64 	%rd617, [%r59+80];
+	xor.b64  	%rd618, %rd616, %rd617;
+	ld.shared.u64 	%rd619, [%r59+120];
+	xor.b64  	%rd620, %rd618, %rd619;
+	ld.shared.u64 	%rd621, [%r59+160];
+	xor.b64  	%rd622, %rd620, %rd621;
+	st.shared.u64 	[%r63], %rd622;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd623, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r159}, %rd623;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r160,%dummy}, %rd623;
+	}
+	shf.l.wrap.b32 	%r161, %r160, %r159, 1;
+	shf.l.wrap.b32 	%r162, %r159, %r160, 1;
+	mov.b64 	%rd624, {%r162, %r161};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd625, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd626, %rd624, %rd625;
+	xor.b64  	%rd627, %rd626, %rd613;
+	st.shared.u64 	[%r69], %rd627;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd628, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd629, %rd628, %r73;
+	shr.u64 	%rd630, %rd628, %r74;
+	or.b64  	%rd631, %rd630, %rd629;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd631;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd632, [%r76];
+	not.b64 	%rd633, %rd632;
+	ld.shared.u64 	%rd634, [%r78];
+	and.b64  	%rd635, %rd634, %rd633;
+	xor.b64  	%rd636, %rd635, %rd631;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd637, %rd636, %rd24;
+	st.shared.u64 	[%r69], %rd637;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd638, [%r59+40];
+	ld.shared.u64 	%rd639, [%r59];
+	xor.b64  	%rd640, %rd638, %rd639;
+	ld.shared.u64 	%rd641, [%r59+80];
+	xor.b64  	%rd642, %rd640, %rd641;
+	ld.shared.u64 	%rd643, [%r59+120];
+	xor.b64  	%rd644, %rd642, %rd643;
+	ld.shared.u64 	%rd645, [%r59+160];
+	xor.b64  	%rd646, %rd644, %rd645;
+	st.shared.u64 	[%r63], %rd646;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd647, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r163}, %rd647;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r164,%dummy}, %rd647;
+	}
+	shf.l.wrap.b32 	%r165, %r164, %r163, 1;
+	shf.l.wrap.b32 	%r166, %r163, %r164, 1;
+	mov.b64 	%rd648, {%r166, %r165};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd649, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd650, %rd648, %rd649;
+	xor.b64  	%rd651, %rd650, %rd637;
+	st.shared.u64 	[%r69], %rd651;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd652, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd653, %rd652, %r73;
+	shr.u64 	%rd654, %rd652, %r74;
+	or.b64  	%rd655, %rd654, %rd653;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd655;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd656, [%r76];
+	not.b64 	%rd657, %rd656;
+	ld.shared.u64 	%rd658, [%r78];
+	and.b64  	%rd659, %rd658, %rd657;
+	xor.b64  	%rd660, %rd659, %rd655;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd661, %rd660, %rd25;
+	st.shared.u64 	[%r69], %rd661;
+	.loc	1 78 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd662, [%r59+40];
+	ld.shared.u64 	%rd663, [%r59];
+	xor.b64  	%rd664, %rd662, %rd663;
+	ld.shared.u64 	%rd665, [%r59+80];
+	xor.b64  	%rd666, %rd664, %rd665;
+	ld.shared.u64 	%rd667, [%r59+120];
+	xor.b64  	%rd668, %rd666, %rd667;
+	ld.shared.u64 	%rd669, [%r59+160];
+	xor.b64  	%rd670, %rd668, %rd669;
+	st.shared.u64 	[%r63], %rd670;
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd671, [%r64+8];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 79 48
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%dummy,%r167}, %rd671;
+	}
+	{
+	.reg .b32 %dummy;
+	mov.b64 	{%r168,%dummy}, %rd671;
+	}
+	shf.l.wrap.b32 	%r169, %r168, %r167, 1;
+	shf.l.wrap.b32 	%r170, %r167, %r168, 1;
+	mov.b64 	%rd672, {%r170, %r169};
+	.loc	1 79 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd673, [%r64+32];
+	.loc	1 79 48, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd674, %rd672, %rd673;
+	xor.b64  	%rd675, %rd674, %rd661;
+	st.shared.u64 	[%r69], %rd675;
+	.loc	1 82 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd676, [%r71];
+	.loc	1 41 68, function_name $L__info_string3, inlined_at 1 82 32
+	shl.b64 	%rd677, %rd676, %r73;
+	shr.u64 	%rd678, %rd676, %r74;
+	or.b64  	%rd679, %rd678, %rd677;
+	.loc	1 82 32, function_name $L__info_string2, inlined_at 1 202 9
+	st.shared.u64 	[%r63], %rd679;
+	.loc	1 85 9, function_name $L__info_string2, inlined_at 1 202 9
+	ld.shared.u64 	%rd680, [%r76];
+	not.b64 	%rd681, %rd680;
+	ld.shared.u64 	%rd682, [%r78];
+	and.b64  	%rd683, %rd682, %rd681;
+	xor.b64  	%rd684, %rd683, %rd679;
+	.loc	1 88 9, function_name $L__info_string2, inlined_at 1 202 9
+	xor.b64  	%rd685, %rd684, %rd26;
+	st.shared.u64 	[%r69], %rd685;
+	.loc	1 204 9
+	@%p5 bra 	$L__BB0_22;
 
-	.loc	1 316 9
-	@%p4 bra 	$L__BB1_24;
+	.loc	1 0 9
+	ld.param.u64 	%rd935, [kernel_lilypad_pow_debug_param_2];
+	.loc	1 212 17
+	ld.shared.v4.u16 	{%rs348, %rs349, %rs350, %rs351}, [%r8+24];
+	ld.shared.v4.u16 	{%rs352, %rs353, %rs354, %rs355}, [%r8+16];
+	ld.shared.v4.u16 	{%rs356, %rs357, %rs358, %rs359}, [%r8+8];
+	ld.shared.v4.u16 	{%rs360, %rs361, %rs362, %rs363}, [%r8];
+	shr.u16 	%rs364, %rs360, 8;
+	shr.u16 	%rs210, %rs361, 8;
+	shr.u16 	%rs365, %rs362, 8;
+	shr.u16 	%rs366, %rs363, 8;
+	cvt.u64.u16 	%rd686, %rs366;
+	cvt.u64.u16 	%rd687, %rs363;
+	bfi.b64 	%rd688, %rd687, %rd686, 8, 8;
+	cvt.u32.u16 	%r171, %rs365;
+	mul.wide.u32 	%rd689, %r171, 65536;
+	or.b64  	%rd690, %rd688, %rd689;
+	cvt.u32.u16 	%r172, %rs362;
+	and.b32  	%r173, %r172, 255;
+	mul.wide.u32 	%rd691, %r173, 16777216;
+	or.b64  	%rd692, %rd690, %rd691;
+	cvt.u64.u16 	%rd693, %rs210;
+	shl.b64 	%rd694, %rd693, 32;
+	cvt.u64.u16 	%rd695, %rs361;
+	shl.b64 	%rd696, %rd695, 40;
+	and.b64  	%rd697, %rd696, 280375465082880;
+	cvt.u64.u16 	%rd698, %rs364;
+	shl.b64 	%rd699, %rd698, 48;
+	cvt.u64.u16 	%rd700, %rs360;
+	shl.b64 	%rd701, %rd700, 56;
+	or.b64  	%rd702, %rd692, %rd694;
+	or.b64  	%rd703, %rd702, %rd697;
+	or.b64  	%rd35, %rd703, %rd699;
+	or.b64  	%rd36, %rd35, %rd701;
+	cvta.to.global.u64 	%rd704, %rd935;
+	.loc	1 215 17
+	.loc	1 94 5, function_name $L__info_string4, inlined_at 1 215 17
+	ld.global.nc.u64 	%rd37, [%rd704+24];
+	setp.gt.u64 	%p12, %rd36, %rd37;
+	mov.u16 	%rs542, 0;
+	@%p12 bra 	$L__BB0_18;
 
-	.loc	1 324 17
-	ld.shared.v4.u16 	{%rs6, %rs7, %rs8, %rs9}, [%r52+16];
-	shr.u16 	%rs11, %rs6, 8;
-	shr.u16 	%rs13, %rs7, 8;
-	shr.u16 	%rs15, %rs8, 8;
-	shr.u16 	%rs17, %rs9, 8;
-	cvt.u64.u16 	%rd186, %rs17;
-	cvt.u64.u16 	%rd187, %rs9;
-	bfi.b64 	%rd188, %rd187, %rd186, 8, 8;
-	cvt.u32.u16 	%r135, %rs15;
-	mul.wide.u32 	%rd189, %r135, 65536;
-	or.b64  	%rd190, %rd188, %rd189;
-	cvt.u32.u16 	%r136, %rs8;
-	and.b32  	%r137, %r136, 255;
-	mul.wide.u32 	%rd191, %r137, 16777216;
-	or.b64  	%rd192, %rd190, %rd191;
-	cvt.u64.u16 	%rd193, %rs13;
-	shl.b64 	%rd194, %rd193, 32;
-	cvt.u64.u16 	%rd195, %rs7;
-	shl.b64 	%rd196, %rd195, 40;
-	and.b64  	%rd197, %rd196, 280375465082880;
-	cvt.u64.u16 	%rd198, %rs11;
-	shl.b64 	%rd199, %rd198, 48;
-	cvt.u64.u16 	%rd200, %rs6;
-	shl.b64 	%rd201, %rd200, 56;
-	or.b64  	%rd202, %rd192, %rd194;
-	or.b64  	%rd203, %rd202, %rd197;
-	or.b64  	%rd204, %rd203, %rd199;
-	or.b64  	%rd19, %rd204, %rd201;
-	ld.shared.v4.u16 	{%rs18, %rs19, %rs20, %rs21}, [%r52+8];
-	shr.u16 	%rs23, %rs18, 8;
-	shr.u16 	%rs25, %rs19, 8;
-	shr.u16 	%rs27, %rs20, 8;
-	shr.u16 	%rs29, %rs21, 8;
-	cvt.u64.u16 	%rd205, %rs29;
-	cvt.u64.u16 	%rd206, %rs21;
-	bfi.b64 	%rd207, %rd206, %rd205, 8, 8;
-	cvt.u32.u16 	%r138, %rs27;
-	mul.wide.u32 	%rd208, %r138, 65536;
-	or.b64  	%rd209, %rd207, %rd208;
-	cvt.u32.u16 	%r139, %rs20;
-	and.b32  	%r140, %r139, 255;
-	mul.wide.u32 	%rd210, %r140, 16777216;
-	or.b64  	%rd211, %rd209, %rd210;
-	cvt.u64.u16 	%rd212, %rs25;
-	shl.b64 	%rd213, %rd212, 32;
-	cvt.u64.u16 	%rd214, %rs19;
-	shl.b64 	%rd215, %rd214, 40;
-	and.b64  	%rd216, %rd215, 280375465082880;
-	cvt.u64.u16 	%rd217, %rs23;
-	shl.b64 	%rd218, %rd217, 48;
-	cvt.u64.u16 	%rd219, %rs18;
-	shl.b64 	%rd220, %rd219, 56;
-	or.b64  	%rd221, %rd211, %rd213;
-	or.b64  	%rd222, %rd221, %rd216;
-	or.b64  	%rd223, %rd222, %rd218;
-	or.b64  	%rd20, %rd223, %rd220;
-	ld.shared.v4.u16 	{%rs30, %rs31, %rs32, %rs33}, [%r52];
-	shr.u16 	%rs35, %rs30, 8;
-	shr.u16 	%rs37, %rs31, 8;
-	shr.u16 	%rs39, %rs32, 8;
-	shr.u16 	%rs41, %rs33, 8;
-	cvt.u64.u16 	%rd224, %rs41;
-	cvt.u64.u16 	%rd225, %rs33;
-	bfi.b64 	%rd226, %rd225, %rd224, 8, 8;
-	cvt.u32.u16 	%r141, %rs39;
-	mul.wide.u32 	%rd227, %r141, 65536;
-	or.b64  	%rd228, %rd226, %rd227;
-	cvt.u32.u16 	%r142, %rs32;
-	and.b32  	%r143, %r142, 255;
-	mul.wide.u32 	%rd229, %r143, 16777216;
-	or.b64  	%rd230, %rd228, %rd229;
-	cvt.u64.u16 	%rd231, %rs37;
-	shl.b64 	%rd232, %rd231, 32;
-	cvt.u64.u16 	%rd233, %rs31;
-	shl.b64 	%rd234, %rd233, 40;
-	and.b64  	%rd235, %rd234, 280375465082880;
-	cvt.u64.u16 	%rd236, %rs35;
-	shl.b64 	%rd237, %rd236, 48;
-	cvt.u64.u16 	%rd238, %rs30;
-	shl.b64 	%rd239, %rd238, 56;
-	or.b64  	%rd240, %rd230, %rd232;
-	or.b64  	%rd241, %rd240, %rd235;
-	or.b64  	%rd242, %rd241, %rd237;
-	or.b64  	%rd21, %rd242, %rd239;
-	.loc	1 327 17
-	.loc	1 128 5, function_name $L__info_string3, inlined_at 1 327 17
-	ld.global.nc.u64 	%rd23, [%rd22+24];
-	setp.gt.u64 	%p13, %rd21, %rd23;
-	mov.u16 	%rs5, 0;
-	mov.u16 	%rs60, %rs5;
-	@%p13 bra 	$L__BB1_20;
+	.loc	1 96 5, function_name $L__info_string4, inlined_at 1 215 17
+	setp.lt.u64 	%p13, %rd36, %rd37;
+	mov.u16 	%rs542, 1;
+	@%p13 bra 	$L__BB0_18;
 
-	.loc	1 130 5, function_name $L__info_string3, inlined_at 1 327 17
-	setp.lt.u64 	%p14, %rd21, %rd23;
-	mov.u16 	%rs42, 1;
-	mov.u16 	%rs60, %rs42;
-	@%p14 bra 	$L__BB1_20;
+	.loc	1 0 5
+	mov.u16 	%rs542, 0;
+	ld.param.u64 	%rd928, [kernel_lilypad_pow_debug_param_2];
+	cvta.to.global.u64 	%rd927, %rd928;
+	.loc	1 98 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u64.u16 	%rd705, %rs356;
+	shl.b64 	%rd706, %rd705, 56;
+	.loc	1 212 17
+	shr.u16 	%rs369, %rs356, 8;
+	.loc	1 98 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u64.u16 	%rd707, %rs369;
+	shl.b64 	%rd708, %rd707, 48;
+	or.b64  	%rd709, %rd706, %rd708;
+	cvt.u64.u16 	%rd710, %rs357;
+	shl.b64 	%rd711, %rd710, 40;
+	and.b64  	%rd712, %rd711, 280375465082880;
+	or.b64  	%rd713, %rd709, %rd712;
+	.loc	1 212 17
+	shr.u16 	%rs370, %rs357, 8;
+	.loc	1 98 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u64.u16 	%rd714, %rs370;
+	shl.b64 	%rd715, %rd714, 32;
+	or.b64  	%rd716, %rd713, %rd715;
+	cvt.u32.u16 	%r174, %rs358;
+	and.b32  	%r175, %r174, 255;
+	mul.wide.u32 	%rd717, %r175, 16777216;
+	or.b64  	%rd718, %rd716, %rd717;
+	.loc	1 212 17
+	shr.u16 	%rs371, %rs358, 8;
+	.loc	1 98 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u32.u16 	%r176, %rs371;
+	mul.wide.u32 	%rd719, %r176, 65536;
+	cvt.u32.u16 	%r177, %rs359;
+	and.b32  	%r178, %r177, 255;
+	mul.wide.u32 	%rd720, %r178, 256;
+	or.b64  	%rd721, %rd718, %rd719;
+	.loc	1 212 17
+	shr.u16 	%rs372, %rs359, 8;
+	.loc	1 98 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u64.u16 	%rd722, %rs372;
+	or.b64  	%rd723, %rd721, %rd720;
+	or.b64  	%rd724, %rd723, %rd722;
+	ld.global.nc.u64 	%rd38, [%rd927+16];
+	setp.gt.u64 	%p14, %rd724, %rd38;
+	@%p14 bra 	$L__BB0_18;
 
-	.loc	1 132 5, function_name $L__info_string3, inlined_at 1 327 17
-	ld.global.nc.u64 	%rd24, [%rd22+16];
-	setp.gt.u64 	%p15, %rd20, %rd24;
-	mov.u16 	%rs60, %rs5;
-	@%p15 bra 	$L__BB1_20;
+	.loc	1 0 5
+	mov.u16 	%rs542, 1;
+	.loc	1 100 5, function_name $L__info_string4, inlined_at 1 215 17
+	setp.lt.u64 	%p15, %rd724, %rd38;
+	@%p15 bra 	$L__BB0_18;
 
-	.loc	1 134 5, function_name $L__info_string3, inlined_at 1 327 17
-	setp.lt.u64 	%p16, %rd20, %rd24;
-	mov.u16 	%rs60, %rs42;
-	@%p16 bra 	$L__BB1_20;
+	.loc	1 0 5
+	mov.u16 	%rs542, 0;
+	ld.param.u64 	%rd930, [kernel_lilypad_pow_debug_param_2];
+	cvta.to.global.u64 	%rd929, %rd930;
+	.loc	1 103 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u64.u16 	%rd746, %rs352;
+	shl.b64 	%rd747, %rd746, 56;
+	.loc	1 212 17
+	shr.u16 	%rs379, %rs352, 8;
+	.loc	1 103 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u64.u16 	%rd748, %rs379;
+	shl.b64 	%rd749, %rd748, 48;
+	or.b64  	%rd750, %rd747, %rd749;
+	cvt.u64.u16 	%rd751, %rs353;
+	shl.b64 	%rd752, %rd751, 40;
+	and.b64  	%rd753, %rd752, 280375465082880;
+	or.b64  	%rd754, %rd750, %rd753;
+	.loc	1 212 17
+	shr.u16 	%rs380, %rs353, 8;
+	.loc	1 103 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u64.u16 	%rd755, %rs380;
+	shl.b64 	%rd756, %rd755, 32;
+	or.b64  	%rd757, %rd754, %rd756;
+	cvt.u32.u16 	%r184, %rs354;
+	and.b32  	%r185, %r184, 255;
+	mul.wide.u32 	%rd758, %r185, 16777216;
+	or.b64  	%rd759, %rd757, %rd758;
+	.loc	1 212 17
+	shr.u16 	%rs381, %rs354, 8;
+	.loc	1 103 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u32.u16 	%r186, %rs381;
+	mul.wide.u32 	%rd760, %r186, 65536;
+	cvt.u32.u16 	%r187, %rs355;
+	and.b32  	%r188, %r187, 255;
+	mul.wide.u32 	%rd761, %r188, 256;
+	or.b64  	%rd762, %rd759, %rd760;
+	.loc	1 212 17
+	shr.u16 	%rs382, %rs355, 8;
+	.loc	1 103 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u64.u16 	%rd763, %rs382;
+	or.b64  	%rd764, %rd762, %rd761;
+	or.b64  	%rd765, %rd764, %rd763;
+	ld.global.nc.u64 	%rd39, [%rd929+8];
+	setp.gt.u64 	%p16, %rd765, %rd39;
+	@%p16 bra 	$L__BB0_18;
 
-	.loc	1 137 5, function_name $L__info_string3, inlined_at 1 327 17
-	ld.global.nc.u64 	%rd25, [%rd22+8];
-	setp.gt.u64 	%p17, %rd19, %rd25;
-	mov.u16 	%rs60, %rs5;
-	@%p17 bra 	$L__BB1_20;
+	.loc	1 0 5
+	mov.u16 	%rs542, 1;
+	.loc	1 105 5, function_name $L__info_string4, inlined_at 1 215 17
+	setp.lt.u64 	%p17, %rd765, %rd39;
+	@%p17 bra 	$L__BB0_18;
 
-	.loc	1 139 5, function_name $L__info_string3, inlined_at 1 327 17
-	setp.lt.u64 	%p18, %rd19, %rd25;
-	mov.u16 	%rs60, %rs42;
-	@%p18 bra 	$L__BB1_20;
+	.loc	1 0 5
+	ld.param.u64 	%rd932, [kernel_lilypad_pow_debug_param_2];
+	cvta.to.global.u64 	%rd931, %rd932;
+	.loc	1 107 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u64.u16 	%rd787, %rs348;
+	shl.b64 	%rd788, %rd787, 56;
+	.loc	1 212 17
+	shr.u16 	%rs388, %rs348, 8;
+	.loc	1 107 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u64.u16 	%rd789, %rs388;
+	shl.b64 	%rd790, %rd789, 48;
+	or.b64  	%rd791, %rd788, %rd790;
+	cvt.u64.u16 	%rd792, %rs349;
+	shl.b64 	%rd793, %rd792, 40;
+	and.b64  	%rd794, %rd793, 280375465082880;
+	or.b64  	%rd795, %rd791, %rd794;
+	.loc	1 212 17
+	shr.u16 	%rs389, %rs349, 8;
+	.loc	1 107 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u64.u16 	%rd796, %rs389;
+	shl.b64 	%rd797, %rd796, 32;
+	or.b64  	%rd798, %rd795, %rd797;
+	cvt.u32.u16 	%r194, %rs350;
+	and.b32  	%r195, %r194, 255;
+	mul.wide.u32 	%rd799, %r195, 16777216;
+	or.b64  	%rd800, %rd798, %rd799;
+	.loc	1 212 17
+	shr.u16 	%rs390, %rs350, 8;
+	.loc	1 107 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u32.u16 	%r196, %rs390;
+	mul.wide.u32 	%rd801, %r196, 65536;
+	cvt.u32.u16 	%r197, %rs351;
+	and.b32  	%r198, %r197, 255;
+	mul.wide.u32 	%rd802, %r198, 256;
+	or.b64  	%rd803, %rd800, %rd801;
+	.loc	1 212 17
+	shr.u16 	%rs391, %rs351, 8;
+	.loc	1 107 5, function_name $L__info_string4, inlined_at 1 215 17
+	cvt.u64.u16 	%rd804, %rs391;
+	or.b64  	%rd805, %rd803, %rd802;
+	or.b64  	%rd806, %rd805, %rd804;
+	ld.global.nc.u64 	%rd808, [%rd931];
+	setp.le.u64 	%p18, %rd806, %rd808;
+	.loc	1 108 9, function_name $L__info_string4, inlined_at 1 215 17
+	selp.u16 	%rs542, 1, 0, %p18;
 
-	.loc	1 324 17
-	ld.shared.v4.u16 	{%rs47, %rs48, %rs49, %rs50}, [%r52+24];
-	.loc	1 141 5, function_name $L__info_string3, inlined_at 1 327 17
-	ld.global.nc.u64 	%rd243, [%rd22];
-	.loc	1 324 17
-	cvt.u64.u16 	%rd244, %rs47;
-	shl.b64 	%rd245, %rd244, 56;
-	shr.u16 	%rs52, %rs47, 8;
-	cvt.u64.u16 	%rd246, %rs52;
-	shl.b64 	%rd247, %rd246, 48;
-	cvt.u64.u16 	%rd248, %rs48;
-	shl.b64 	%rd249, %rd248, 40;
-	and.b64  	%rd250, %rd249, 280375465082880;
-	shr.u16 	%rs55, %rs50, 8;
-	cvt.u64.u16 	%rd251, %rs55;
-	cvt.u64.u16 	%rd252, %rs50;
-	bfi.b64 	%rd253, %rd252, %rd251, 8, 8;
-	shr.u16 	%rs57, %rs49, 8;
-	cvt.u32.u16 	%r144, %rs57;
-	mul.wide.u32 	%rd254, %r144, 65536;
-	or.b64  	%rd255, %rd253, %rd254;
-	cvt.u32.u16 	%r145, %rs49;
-	and.b32  	%r146, %r145, 255;
-	mul.wide.u32 	%rd256, %r146, 16777216;
-	or.b64  	%rd257, %rd255, %rd256;
-	shr.u16 	%rs58, %rs48, 8;
-	cvt.u64.u16 	%rd258, %rs58;
-	shl.b64 	%rd259, %rd258, 32;
-	or.b64  	%rd260, %rd257, %rd259;
-	or.b64  	%rd261, %rd260, %rd250;
-	or.b64  	%rd262, %rd261, %rd247;
-	or.b64  	%rd263, %rd262, %rd245;
-	.loc	1 141 5, function_name $L__info_string3, inlined_at 1 327 17
-	setp.le.u64 	%p19, %rd263, %rd243;
-	.loc	1 142 9, function_name $L__info_string3, inlined_at 1 327 17
-	selp.u16 	%rs60, 1, 0, %p19;
+$L__BB0_18:
+	.loc	1 215 17
+	setp.eq.s16 	%p19, %rs542, 0;
+	@%p19 bra 	$L__BB0_21;
 
-$L__BB1_20:
-	.loc	1 327 17
-	setp.eq.s16 	%p20, %rs60, 0;
-	@%p20 bra 	$L__BB1_23;
+	.loc	1 212 17
+	cvt.u64.u16 	%rd934, %rs363;
+	shr.u16 	%rs411, %rs363, 8;
+	cvt.u64.u16 	%rd933, %rs411;
+	shr.u16 	%rs410, %rs361, 8;
+	shr.u16 	%rs409, %rs362, 8;
+	shr.u16 	%rs392, %rs351, 8;
+	.loc	1 217 17
+	.loc	1 136 9, function_name $L__info_string5, inlined_at 1 217 17
+	cvt.u64.u16 	%rd811, %rs392;
+	shl.b64 	%rd812, %rd811, 56;
+	mov.u64 	%rd940, 0;
+	cvt.u64.u16 	%rd813, %rs351;
+	shl.b64 	%rd814, %rd813, 48;
+	and.b64  	%rd815, %rd814, 71776119061217280;
+	or.b64  	%rd816, %rd812, %rd815;
+	.loc	1 212 17
+	shr.u16 	%rs393, %rs350, 8;
+	.loc	1 136 9, function_name $L__info_string5, inlined_at 1 217 17
+	cvt.u64.u16 	%rd817, %rs393;
+	shl.b64 	%rd818, %rd817, 40;
+	or.b64  	%rd819, %rd816, %rd818;
+	cvt.u64.u16 	%rd820, %rs350;
+	shl.b64 	%rd821, %rd820, 32;
+	and.b64  	%rd822, %rd821, 1095216660480;
+	or.b64  	%rd823, %rd819, %rd822;
+	.loc	1 212 17
+	shr.u16 	%rs394, %rs349, 8;
+	.loc	1 136 9, function_name $L__info_string5, inlined_at 1 217 17
+	cvt.u32.u16 	%r199, %rs394;
+	mul.wide.u32 	%rd824, %r199, 16777216;
+	cvt.u32.u16 	%r200, %rs349;
+	and.b32  	%r201, %r200, 255;
+	mul.wide.u32 	%rd825, %r201, 65536;
+	.loc	1 212 17
+	shr.u16 	%rs395, %rs348, 8;
+	.loc	1 136 9, function_name $L__info_string5, inlined_at 1 217 17
+	cvt.u32.u16 	%r202, %rs395;
+	mul.wide.u32 	%rd826, %r202, 256;
+	cvt.u64.u16 	%rd827, %rs348;
+	or.b64  	%rd828, %rd823, %rd824;
+	or.b64  	%rd829, %rd828, %rd825;
+	or.b64  	%rd830, %rd829, %rd826;
+	or.b64  	%rd831, %rd830, %rd827;
+	.loc	1 218 16
+	shl.b64 	%rd833, %rd933, 56;
+	shl.b64 	%rd835, %rd934, 48;
+	and.b64  	%rd836, %rd835, 71776119061217280;
+	or.b64  	%rd837, %rd833, %rd836;
+	.loc	1 212 17
+	cvt.u64.u16 	%rd838, %rs409;
+	.loc	1 218 16
+	shl.b64 	%rd839, %rd838, 40;
+	or.b64  	%rd840, %rd837, %rd839;
+	.loc	1 212 17
+	cvt.u64.u16 	%rd841, %rs362;
+	.loc	1 218 16
+	shl.b64 	%rd842, %rd841, 32;
+	and.b64  	%rd843, %rd842, 1095216660480;
+	or.b64  	%rd844, %rd840, %rd843;
+	cvt.u32.u16 	%r203, %rs410;
+	mul.wide.u32 	%rd845, %r203, 16777216;
+	or.b64  	%rd846, %rd844, %rd845;
+	cvt.u32.u16 	%r204, %rs361;
+	and.b32  	%r205, %r204, 255;
+	mul.wide.u32 	%rd847, %r205, 65536;
+	shr.u64 	%rd848, %rd35, 40;
+	and.b64  	%rd849, %rd848, 65280;
+	or.b64  	%rd850, %rd846, %rd847;
+	or.b64  	%rd851, %rd850, %rd849;
+	.loc	1 135 9, function_name $L__info_string5, inlined_at 1 217 17
+	shr.u64 	%rd852, %rd36, 56;
+	.loc	1 218 16
+	or.b64  	%rd853, %rd851, %rd852;
+	shr.u64 	%rd854, %rd850, 56;
+	st.global.u8 	[%rd810+7], %rd854;
+	shr.u64 	%rd855, %rd850, 48;
+	st.global.u8 	[%rd810+6], %rd855;
+	shr.u64 	%rd856, %rd850, 40;
+	st.global.u8 	[%rd810+5], %rd856;
+	shr.u64 	%rd857, %rd850, 32;
+	st.global.u8 	[%rd810+4], %rd857;
+	shr.u64 	%rd858, %rd850, 24;
+	st.global.u8 	[%rd810+3], %rd858;
+	shr.u64 	%rd859, %rd850, 16;
+	st.global.u8 	[%rd810+2], %rd859;
+	shr.u64 	%rd860, %rd851, 8;
+	st.global.u8 	[%rd810+1], %rd860;
+	st.global.u8 	[%rd810], %rd853;
+	.loc	1 212 17
+	shr.u16 	%rs398, %rs359, 8;
+	.loc	1 218 16
+	cvt.u64.u16 	%rd861, %rs398;
+	shl.b64 	%rd862, %rd861, 56;
+	cvt.u64.u16 	%rd863, %rs359;
+	shl.b64 	%rd864, %rd863, 48;
+	and.b64  	%rd865, %rd864, 71776119061217280;
+	or.b64  	%rd866, %rd862, %rd865;
+	.loc	1 212 17
+	shr.u16 	%rs399, %rs358, 8;
+	.loc	1 218 16
+	cvt.u64.u16 	%rd867, %rs399;
+	shl.b64 	%rd868, %rd867, 40;
+	or.b64  	%rd869, %rd866, %rd868;
+	cvt.u64.u16 	%rd870, %rs358;
+	shl.b64 	%rd871, %rd870, 32;
+	and.b64  	%rd872, %rd871, 1095216660480;
+	or.b64  	%rd873, %rd869, %rd872;
+	.loc	1 212 17
+	shr.u16 	%rs400, %rs357, 8;
+	.loc	1 218 16
+	cvt.u32.u16 	%r206, %rs400;
+	mul.wide.u32 	%rd874, %r206, 16777216;
+	or.b64  	%rd875, %rd873, %rd874;
+	cvt.u32.u16 	%r207, %rs357;
+	and.b32  	%r208, %r207, 255;
+	mul.wide.u32 	%rd876, %r208, 65536;
+	.loc	1 212 17
+	shr.u16 	%rs401, %rs356, 8;
+	.loc	1 218 16
+	cvt.u32.u16 	%r209, %rs401;
+	mul.wide.u32 	%rd877, %r209, 256;
+	or.b64  	%rd878, %rd875, %rd876;
+	cvt.u64.u16 	%rd879, %rs356;
+	or.b64  	%rd880, %rd878, %rd877;
+	or.b64  	%rd881, %rd880, %rd879;
+	shr.u64 	%rd882, %rd880, 56;
+	st.global.u8 	[%rd810+15], %rd882;
+	shr.u64 	%rd883, %rd880, 48;
+	st.global.u8 	[%rd810+14], %rd883;
+	shr.u64 	%rd884, %rd880, 40;
+	st.global.u8 	[%rd810+13], %rd884;
+	shr.u64 	%rd885, %rd880, 32;
+	st.global.u8 	[%rd810+12], %rd885;
+	shr.u64 	%rd886, %rd880, 24;
+	st.global.u8 	[%rd810+11], %rd886;
+	shr.u64 	%rd887, %rd880, 16;
+	st.global.u8 	[%rd810+10], %rd887;
+	shr.u64 	%rd888, %rd880, 8;
+	st.global.u8 	[%rd810+9], %rd888;
+	st.global.u8 	[%rd810+8], %rd881;
+	.loc	1 212 17
+	shr.u16 	%rs402, %rs355, 8;
+	.loc	1 218 16
+	cvt.u64.u16 	%rd889, %rs402;
+	shl.b64 	%rd890, %rd889, 56;
+	cvt.u64.u16 	%rd891, %rs355;
+	shl.b64 	%rd892, %rd891, 48;
+	and.b64  	%rd893, %rd892, 71776119061217280;
+	or.b64  	%rd894, %rd890, %rd893;
+	.loc	1 212 17
+	shr.u16 	%rs403, %rs354, 8;
+	.loc	1 218 16
+	cvt.u64.u16 	%rd895, %rs403;
+	shl.b64 	%rd896, %rd895, 40;
+	or.b64  	%rd897, %rd894, %rd896;
+	cvt.u64.u16 	%rd898, %rs354;
+	shl.b64 	%rd899, %rd898, 32;
+	and.b64  	%rd900, %rd899, 1095216660480;
+	or.b64  	%rd901, %rd897, %rd900;
+	.loc	1 212 17
+	shr.u16 	%rs404, %rs353, 8;
+	.loc	1 218 16
+	cvt.u32.u16 	%r210, %rs404;
+	mul.wide.u32 	%rd902, %r210, 16777216;
+	or.b64  	%rd903, %rd901, %rd902;
+	cvt.u32.u16 	%r211, %rs353;
+	and.b32  	%r212, %r211, 255;
+	mul.wide.u32 	%rd904, %r212, 65536;
+	.loc	1 212 17
+	shr.u16 	%rs405, %rs352, 8;
+	.loc	1 218 16
+	cvt.u32.u16 	%r213, %rs405;
+	mul.wide.u32 	%rd905, %r213, 256;
+	or.b64  	%rd906, %rd903, %rd904;
+	cvt.u64.u16 	%rd907, %rs352;
+	or.b64  	%rd908, %rd906, %rd905;
+	or.b64  	%rd909, %rd908, %rd907;
+	shr.u64 	%rd910, %rd908, 56;
+	st.global.u8 	[%rd810+23], %rd910;
+	shr.u64 	%rd911, %rd908, 48;
+	st.global.u8 	[%rd810+22], %rd911;
+	shr.u64 	%rd912, %rd908, 40;
+	st.global.u8 	[%rd810+21], %rd912;
+	shr.u64 	%rd913, %rd908, 32;
+	st.global.u8 	[%rd810+20], %rd913;
+	shr.u64 	%rd914, %rd908, 24;
+	st.global.u8 	[%rd810+19], %rd914;
+	shr.u64 	%rd915, %rd908, 16;
+	st.global.u8 	[%rd810+18], %rd915;
+	shr.u64 	%rd916, %rd908, 8;
+	st.global.u8 	[%rd810+17], %rd916;
+	st.global.u8 	[%rd810+16], %rd909;
+	shr.u64 	%rd917, %rd830, 56;
+	st.global.u8 	[%rd810+31], %rd917;
+	shr.u64 	%rd918, %rd830, 48;
+	st.global.u8 	[%rd810+30], %rd918;
+	shr.u64 	%rd919, %rd830, 40;
+	st.global.u8 	[%rd810+29], %rd919;
+	shr.u64 	%rd920, %rd830, 32;
+	st.global.u8 	[%rd810+28], %rd920;
+	shr.u64 	%rd921, %rd830, 24;
+	st.global.u8 	[%rd810+27], %rd921;
+	shr.u64 	%rd922, %rd830, 16;
+	st.global.u8 	[%rd810+26], %rd922;
+	shr.u64 	%rd923, %rd830, 8;
+	st.global.u8 	[%rd810+25], %rd923;
+	st.global.u8 	[%rd810+24], %rd831;
+	.loc	1 219 16
+	st.global.u8 	[%rd924], %rs478;
+	st.global.u8 	[%rd924+1], %rs479;
+	st.global.u8 	[%rd924+2], %rs480;
+	st.global.u8 	[%rd924+3], %rs481;
+	st.global.u8 	[%rd924+4], %rs482;
+	st.global.u8 	[%rd924+5], %rs483;
+	st.global.u8 	[%rd924+6], %rs484;
+	st.global.u8 	[%rd924+7], %rs485;
+	st.global.u8 	[%rd924+8], %rs486;
+	st.global.u8 	[%rd924+9], %rs487;
+	st.global.u8 	[%rd924+10], %rs488;
+	st.global.u8 	[%rd924+11], %rs489;
+	st.global.u8 	[%rd924+12], %rs490;
+	st.global.u8 	[%rd924+13], %rs491;
+	st.global.u8 	[%rd924+14], %rs492;
+	st.global.u8 	[%rd924+15], %rs493;
+	st.global.u8 	[%rd924+16], %rs494;
+	st.global.u8 	[%rd924+17], %rs495;
+	st.global.u8 	[%rd924+18], %rs496;
+	st.global.u8 	[%rd924+19], %rs497;
+	st.global.u8 	[%rd924+20], %rs498;
+	st.global.u8 	[%rd924+21], %rs499;
+	st.global.u8 	[%rd924+22], %rs500;
+	st.global.u8 	[%rd924+23], %rs501;
+	st.global.u8 	[%rd924+24], %rs502;
+	st.global.u8 	[%rd924+25], %rs503;
+	st.global.u8 	[%rd924+26], %rs504;
+	st.global.u8 	[%rd924+27], %rs505;
+	st.global.u8 	[%rd924+28], %rs506;
+	st.global.u8 	[%rd924+29], %rs507;
+	st.global.u8 	[%rd924+30], %rs508;
+	st.global.u8 	[%rd924+31], %rs509;
+	st.global.u8 	[%rd924+32], %rs510;
+	st.global.u8 	[%rd924+33], %rs511;
+	st.global.u8 	[%rd924+34], %rs512;
+	st.global.u8 	[%rd924+35], %rs513;
+	st.global.u8 	[%rd924+36], %rs514;
+	st.global.u8 	[%rd924+37], %rs515;
+	st.global.u8 	[%rd924+38], %rs516;
+	st.global.u8 	[%rd924+39], %rs517;
+	st.global.u8 	[%rd924+40], %rs518;
+	st.global.u8 	[%rd924+41], %rs519;
+	st.global.u8 	[%rd924+42], %rs520;
+	st.global.u8 	[%rd924+43], %rs521;
+	st.global.u8 	[%rd924+44], %rs522;
+	st.global.u8 	[%rd924+45], %rs523;
+	st.global.u8 	[%rd924+46], %rs524;
+	st.global.u8 	[%rd924+47], %rs525;
+	st.global.u8 	[%rd924+48], %rs526;
+	st.global.u8 	[%rd924+49], %rs527;
+	st.global.u8 	[%rd924+50], %rs528;
+	st.global.u8 	[%rd924+51], %rs529;
+	st.global.u8 	[%rd924+52], %rs530;
+	st.global.u8 	[%rd924+53], %rs531;
+	st.global.u8 	[%rd924+54], %rs532;
+	st.global.u8 	[%rd924+55], %rs533;
+	st.global.u8 	[%rd924+56], %rs534;
+	st.global.u8 	[%rd924+57], %rs535;
+	st.global.u8 	[%rd924+58], %rs536;
+	st.global.u8 	[%rd924+59], %rs537;
+	st.global.u8 	[%rd924+60], %rs538;
+	st.global.u8 	[%rd924+61], %rs539;
+	st.global.u8 	[%rd924+62], %rs540;
+	st.global.u8 	[%rd924+63], %rs541;
 
-	.loc	1 0 17
-	mov.u64 	%rd271, 0;
+$L__BB0_20:
+	.loc	1 0 16
+	add.s64 	%rd925, %rd939, %rd940;
+	ld.u8 	%rs406, [%rd925];
+	add.s64 	%rd926, %rd40, %rd940;
+	st.global.u8 	[%rd926], %rs406;
+	add.s64 	%rd940, %rd940, 1;
+	setp.lt.u64 	%p20, %rd940, 32;
+	@%p20 bra 	$L__BB0_20;
 
-$L__BB1_22:
-	add.s64 	%rd265, %rd270, %rd271;
-	ld.u8 	%rs59, [%rd265];
-	add.s64 	%rd266, %rd26, %rd271;
-	st.global.u8 	[%rd266], %rs59;
-	add.s64 	%rd271, %rd271, 1;
-	setp.lt.u64 	%p21, %rd271, 32;
-	@%p21 bra 	$L__BB1_22;
-
-$L__BB1_23:
-	.loc	1 335 13
-	{ // callseq 3, 0
+$L__BB0_21:
+	.loc	1 223 13
+	{ // callseq 2, 0
 	.reg .b32 temp_param_reg;
 	.param .b64 param0;
-	st.param.b64 	[param0+0], %rd270;
+	st.param.b64 	[param0+0], %rd939;
 	call.uni 
 	free, 
 	(
 	param0
 	);
-	} // callseq 3
+	} // callseq 2
 
-$L__BB1_24:
-	.loc	1 295 42
-	add.s32 	%r147, %r147, 1;
-	.loc	1 295 5
-	setp.lt.s32 	%p22, %r147, %r6;
-	@%p22 bra 	$L__BB1_4;
+$L__BB0_22:
+	.loc	1 183 42
+	add.s32 	%r215, %r215, 1;
+	.loc	1 183 5
+	setp.lt.s32 	%p21, %r215, %r5;
+	@%p21 bra 	$L__BB0_4;
 
-$L__BB1_25:
-	.loc	1 338 1
+$L__BB0_23:
+	.loc	1 226 1
 	ret;
 
 }
@@ -1343,10 +2067,13 @@ $L__info_string1:
 .b8 95,90,49,48,97,100,100,85,105,110,116,50,53,54,80,75,121,121,0
 $L__info_string2:
 .b8 95,90,78,51,57,95,73,78,84,69,82,78,65,76,95,57,52,52,53,57,57,48,102,95,57,95,107,101,99,99,97,107,95,99,117,95,98,98,98,50
-.b8 102,97,54,101,50,52,99,117,100,97,95,107,101,99,99,97,107,95,112,101,114,109,117,116,97,116,105,111,110,115,69,80,121,83,48,95,83,48,95,105
-.b8 0
+.b8 102,97,54,101,50,52,99,117,100,97,95,107,101,99,99,97,107,95,112,101,114,109,117,116,97,116,105,111,110,115,69,80,121,83,48,95,105,0
 $L__info_string3:
+.b8 95,90,54,114,111,116,97,116,101,121,106,0
+$L__info_string4:
 .b8 95,90,78,51,57,95,73,78,84,69,82,78,65,76,95,57,52,52,53,57,57,48,102,95,57,95,107,101,99,99,97,107,95,99,117,95,98,98,98,50
 .b8 102,97,54,101,49,53,104,97,115,104,98,101,108,111,119,116,97,114,103,101,116,69,80,75,121,83,49,95,0
+$L__info_string5:
+.b8 95,90,49,50,114,101,118,101,114,115,101,65,114,114,97,121,80,104,105,0
 
 	}

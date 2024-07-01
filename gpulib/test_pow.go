@@ -44,8 +44,8 @@ func RunPow(ctx context.Context) error {
 	count := 0
 	nowT := time.Now()
 
-	grid := 38
-	block := 1024
+	grid := 1
+	block := 32
 	batch := grid * block
 	threadPerThread := 1
 	for {
