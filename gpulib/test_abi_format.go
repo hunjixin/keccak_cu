@@ -1,4 +1,4 @@
-package main
+package gpulib
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	"gorgonia.org/cu"
 )
 
-func run_kernal_pack_argument_test(ctx context.Context) error {
+func Run_kernal_pack_argument_test(ctx context.Context) error {
 	file, err := os.ReadFile("keccak.ptx")
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func run_kernal_pack_argument_test(ctx context.Context) error {
 
 	fmt.Println("cuda result:", hex.EncodeToString(result[:]))
 
-	result2, _ := formatMinerArgs(challenge, new(big.Int).Add(nonce, big.NewInt(1266523343)))
+	result2, _ := FormatMinerArgs(challenge, new(big.Int).Add(nonce, big.NewInt(1266523343)))
 	fmt.Println("go result  :", hex.EncodeToString(result2[:]))
 	return nil
 }
@@ -100,7 +100,7 @@ func cuda_formatMinerArgs(fn cu.Function, hChanllenge [32]byte, nonce *big.Int) 
 	return hOut, nil
 }
 
-func formatMinerArgs(challenge [32]byte, nonce *big.Int) ([]byte, error) {
+func FormatMinerArgs(challenge [32]byte, nonce *big.Int) ([]byte, error) {
 	//todo use nonce in replace instead of building from scratch for better performance
 	// keccak256(abi.encodePacked(lastChallenge, msg.sender, nodeId));
 	bytes32Ty, _ := abi.NewType("bytes32", "", nil)

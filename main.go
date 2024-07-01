@@ -5,11 +5,10 @@ import "C"
 import (
 	"context"
 	"fmt"
+	"github/hunjixin/keccak_cu/gpulib"
 )
 
-var debug = false
-
 func main() {
-
-	fmt.Println(runPow(context.Background()))
+	gpulib.Debug = true
+	fmt.Println(gpulib.RunPow(context.Background()))
 }
