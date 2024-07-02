@@ -181,7 +181,7 @@ extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow(
         return;
     }
 
-    int wrapInOneLaunch = thread / 32;
+    uint64_t wrapInOneLaunch = thread / 32;
     int threadIndexInWrap = thread % 32; // index in wrap
     if (threadIndexInWrap >= 25)         // abort 26-32 thread
     {
@@ -189,8 +189,6 @@ extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow(
     }
 
     int wrapIndexInBlock = threadIdx.x / 32; // one wrap one worker, 25/32 usages
-    // printf("wrapIndexInBlock %d\n",  wrapIndexInBlock);
-    // printf("threadIndexInWrap %d\n",  threadIndexInWrap);
 
     __shared__ nonce_t stateInBlock[WRAP_IN_BLOCK][KECCAK_STATE_SIZE];
     __shared__ nonce_t cInBlock[WRAP_IN_BLOCK][25];
@@ -199,11 +197,10 @@ extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow(
     nonce_t *C = cInBlock[wrapIndexInBlock];
 
     C[threadIndexInWrap].uint64 = 0;
-    // printf("C[0] %d\n",  C[1]);
 
     __syncwarp();
-    int nonceOffset = wrapInOneLaunch * hashPerThread;
-    int endNonceOffset = (wrapInOneLaunch + 1) * hashPerThread;
+    uint64_t nonceOffset = wrapInOneLaunch * hashPerThread;
+    uint64_t endNonceOffset = (wrapInOneLaunch + 1) * hashPerThread;
     for (; nonceOffset < endNonceOffset; nonceOffset++)
     {
         nonce_t nonce[4];
@@ -218,7 +215,6 @@ extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow(
 
             state[8].uint64 ^= 1;
             state[16].uint64 ^= 9223372036854775808ULL;
-            //  cuda_keccak_permutations_old((uint64_t*)state);
         }
 
         __syncwarp();
@@ -258,8 +254,6 @@ extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow_debug(
     }
 
     int wrapIndexInBlock = threadIdx.x / 32; // one wrap one worker, 25/32 usages
-    // printf("wrapIndexInBlock %d\n",  wrapIndexInBlock);
-    // printf("threadIndexInWrap %d\n",  threadIndexInWrap);
 
     __shared__ nonce_t stateInBlock[WRAP_IN_BLOCK][KECCAK_STATE_SIZE];
     __shared__ nonce_t cInBlock[WRAP_IN_BLOCK][25];
@@ -268,7 +262,6 @@ extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow_debug(
     nonce_t *C = cInBlock[wrapIndexInBlock];
 
     C[threadIndexInWrap].uint64 = 0;
-    // printf("C[0] %d\n",  C[1]);
 
     __syncwarp();
     uint64_t nonceOffset = wrapInOneLaunch * hashPerThread;
@@ -290,7 +283,6 @@ extern "C" __global__ __launch_bounds__(1024) void kernel_lilypad_pow_debug(
 
             state[8].uint64 ^= 1;
             state[16].uint64 ^= 9223372036854775808ULL;
-            //  cuda_keccak_permutations_old((uint64_t*)state);
         }
 
         __syncwarp();
