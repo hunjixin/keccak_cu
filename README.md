@@ -1,6 +1,6 @@
 # keccak cuda hash
 
-implemation of paper https://www.researchgate.net/publication/220849942_GPU_Implementation_of_the_Keccak_Hash_Function_Family.
+implementation of paper https://www.researchgate.net/publication/220849942_GPU_Implementation_of_the_Keccak_Hash_Function_Family.
 also do some improvement with asm.
 
 
