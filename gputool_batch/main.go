@@ -44,7 +44,7 @@ func main() {
 	flag.IntVar(&grid, "grid", 38, "grid size")
 	flag.IntVar(&block, "block", 1024, "block size")
 	flag.IntVar(&threadPerThread, "hash_per_thread", 1, "hash to calculate per threads")
-	flag.StringVar(&difficultyStr, "difficulty", "222184279848854989393011342979769403266326301844165995655665287168", "difficulty")
+	flag.StringVar(&difficultyStr, "difficulty", "222184279848854989393011342979769403266326301844165995655665287168", "difficulty  555460709263765739036470010701196062214039696708679004195670928130048(8M) 92576780592126171815437600338300430792573009392238517278497593884672(40M)")
 	flag.Parse()
 	fmt.Println(runPow(context.Background()))
 }
