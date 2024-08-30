@@ -3,6 +3,7 @@ module github/hunjixin/keccak_cu
 go 1.22.3
 
 require (
+	github.com/ALTree/bigfloat v0.2.0
 	github.com/ethereum/go-ethereum v1.14.5
 	github.com/holiman/uint256 v1.2.4
 	github.com/pkg/errors v0.9.1
