@@ -119,7 +119,7 @@ func runPow(ctx context.Context) error {
 		rand.Read(challenge[:])
 
 		nonce := [32]byte{}
-		rand.Read(nonce[:])
+		rand.Read(nonce[16:])
 		startNonce := new(big.Int).SetBytes(nonce[:])
 
 		count := 0
