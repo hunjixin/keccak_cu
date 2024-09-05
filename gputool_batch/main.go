@@ -131,6 +131,8 @@ func runPow(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
+			dur := float64(time.Since(nowT).Milliseconds()) / 1000.0
+
 			err = cuCtx.Error()
 			if err != nil {
 				fmt.Println(err)
@@ -138,13 +140,6 @@ func runPow(ctx context.Context) error {
 			}
 
 			count += batch
-			if count%(batch*4) == 0 {
-				secs := float64(time.Since(nowT).Milliseconds()) / 1000
-				if secs > 0 {
-					realHashrate = float64(count/1000/1000) / secs
-					fmt.Printf("%2f speed MHASH/s  cur nonce: %s \n", realHashrate, curNonce.String())
-				}
-			}
 			curNonce = new(big.Int).Add(curNonce, big.NewInt(int64(batch)))
 			if resultNonce.BitLen() == 0 {
 				continue
@@ -157,7 +152,7 @@ func runPow(ctx context.Context) error {
 			}
 
 			if hashNumber.ToBig().Cmp(difficulty) == -1 {
-				dur := float64(time.Since(nowT).Milliseconds()) / 1000.0
+				realHashrate = float64(count/1000/1000) / dur
 				fmt.Println("********* find nonce ******")
 				fmt.Println("time used ", time.Since(nowT).Milliseconds(), "ms")
 				fmt.Println("gap ", new(big.Int).Sub(resultNonce, startNonce).String())
