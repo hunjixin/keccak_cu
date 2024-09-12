@@ -68,7 +68,7 @@ func RunPow(ctx context.Context) error {
 	fmt.Println(hex.EncodeToString(difficulty.Bytes()))
 	thread := 68
 	block := 1024
-	batch := thread * block
+	batch := thread * block / 32
 	threadPerThread := 500
 	for {
 		resultNonce, err := Kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, thread, block, threadPerThread) // kernel_lilypad_pow_with_ctx_debug(cuCtx, fn, challenge, startNonce, difficulty, 32, 1024)

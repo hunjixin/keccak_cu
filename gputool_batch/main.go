@@ -103,7 +103,7 @@ func runPow(ctx context.Context) error {
 	difficulty, _ := new(big.Int).SetString(difficultyStr, 10)
 	//2221842798488549893930113429797694032668256326301844165995655665287168
 
-	batch := grid * block * threadPerThread
+	batch := grid * block * threadPerThread / 32
 	fmt.Println("use arg", grid, block, threadPerThread)
 	fmt.Println(batch, " hash per kernel")
 

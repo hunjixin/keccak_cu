@@ -17,15 +17,6 @@ typedef union
 __constant__ uint64_t d_midstate[25];
 __constant__ uint64_t d_target[1];
 
-__device__ __forceinline__ nonce_t bswap_64(nonce_t const input)
-{
-    nonce_t output;
-    asm("{"
-        "  prmt.b32 %0, %3, 0, 0x0123;"
-        "  prmt.b32 %1, %2, 0, 0x0123;"
-        "}" : "=r"(output.uint2.x), "=r"(output.uint2.y) : "r"(input.uint2.x), "r"(input.uint2.y));
-    return output;
-}
 
 __device__ __forceinline__ nonce_t xor5(nonce_t const a, nonce_t const b, nonce_t const c, nonce_t const d, nonce_t const e)
 {
