@@ -4,7 +4,7 @@ implemation of paper https://www.researchgate.net/publication/220849942_GPU_Impl
 also do some improvement with asm.
 
 
-performance: test on 3060ti         1400M hash/s
+performance: test on 3060ti         43M hash/s
 
 command
 
